@@ -1,0 +1,26 @@
+#use <conio>
+#use <util>
+
+int result_width(int width, int height) {
+  return width;
+}
+
+int result_height(int width, int height) {
+  return height;
+}
+
+pixel_t[] manipulate(pixel_t[] in, int width, int height) {
+  int row;
+  int col;
+  int index;
+  int scale;
+  pixel_t[] out = alloc_array(pixel_t, width * height);
+  for (row = 0; row < height; row++) {
+    for (col = 0; col < width; col++) {
+      index = get_index(row,col,width,height);
+      scale = (get_red(in[index])+get_green(in[index])+get_blue(in[index]))/3;
+      out[index] = make_pixel(get_alpha(in[index]),scale,scale,scale);
+    }
+  }
+  return out;
+}

@@ -1,0 +1,77 @@
+#use <conio>
+#use <util>
+
+bool no_negative_element(int[] in, int length)
+//@requires length > 0 && \length(in) == length;
+{
+  for (int i = 0; i < length; i++)
+  //@loop_invariant i >= 0 && i <= length;
+  {
+    if (in[i] < 0) return false;
+  }
+  return true;
+}
+
+pixel_t[] blur(pixel_t[] in, int width, int height, int[] mask, int maskwidth)
+//@requires is_valid_imagesize(width, height);
+//@requires \length(in) == width * height;
+//@requires is_valid_imagesize(maskwidth, maskwidth);
+//@requires \length(mask) == maskwidth * maskwidth;
+//@requires maskwidth % 2 == 1;
+//@requires mask[\length(mask)/2] > 0;
+//@requires no_negative_element(mask, maskwidth * maskwidth);
+//@ensures \result != in;
+//@ensures \length(\result) == \length(in);
+{
+  pixel_t[] out = alloc_array(pixel_t, width * height);
+  int row;
+  int col;
+  int i;
+  int j;
+  int ctr;
+  int index;
+  int ttl_r;
+  int ttl_g;
+  int ttl_b;
+  int div;
+  for (row = 0; row < height; row++)
+  //@loop_invariant row >= 0 && row <= height;
+  {
+    for (col = 0; col < width; col++)
+    //@loop_invariant col >= 0 && col <= width;
+    /* @loop_invariant row == height || col == width ||
+       is_valid_pixel(row, col, width, height); */
+    {
+      index = get_index(row, col, width, height);
+      ctr = 0;
+      ttl_r = 0;
+      ttl_g = 0;
+      ttl_b = 0;
+      div = 0;
+      for (i = row - maskwidth / 2; i <= row + maskwidth / 2; i++)
+      //@loop_invariant i >= row-maskwidth/2 && i <= row+maskwidth/2+1;
+      {
+        for (j = col - maskwidth / 2; j <= col + maskwidth / 2; j++)
+        /* @loop_invariant j >= col-maskwidth/2 && j <= col+maskwidth/2+1 &&
+           ctr <= maskwidth * maskwidth; */
+        {
+          if (is_valid_pixel(i,j,width,height)) {
+            ttl_r += get_red(in[get_index(i,j,width,height)]) * mask[ctr];
+            ttl_g += get_green(in[get_index(i,j,width,height)]) * mask[ctr];
+            ttl_b += get_blue(in[get_index(i,j,width,height)]) * mask[ctr];
+            div += mask[ctr];
+          }
+          ctr++;
+        }
+      }
+      if (div > 0) {
+        out[index] = make_pixel(get_alpha(in[index]),
+                                ttl_r/div, ttl_g/div, ttl_b/div);
+      }
+      else {
+        out[index] = in[index];
+      }
+    }
+  }
+  return out;
+}

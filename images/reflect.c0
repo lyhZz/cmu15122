@@ -1,0 +1,41 @@
+#use <conio>
+#use <util>
+
+pixel_t[] reflect(pixel_t[] in, int in_width, int in_height)
+//@requires \length(in) == in_width * in_height;
+//@requires is_valid_imagesize(in_width, in_height);
+//@ensures \length(\result) == in_width * in_height * 4;
+//@ensures \result != in;
+{
+  int out_height = in_height * 2;
+  int out_width = in_width * 2;
+  pixel_t[] out = alloc_array(pixel_t, out_width * out_height);
+  int row;
+  int col;
+  
+  for (row = 0; row < in_height; row++)
+  //@loop_invariant row >= 0 && row <= in_height;
+  {
+    for (col = 0; col < in_width; col++)
+    //@loop_invariant col >= 0 && col <= in_width;
+    {
+      out[get_index(row, in_width+col, out_width, out_height)] = 
+        in[get_index(row, col, in_width, in_height)];
+      out[get_index(row, col, out_width, out_height)] = 
+        in[get_index(row, in_width-1-col, in_width, in_height)];
+    }
+  }
+  
+  for (row = in_height; row < out_height; row++)
+  //@loop_invariant row >= 0 && row <= out_height;
+  {
+    for (col = 0; col < out_width; col++)
+    //@loop_invariant col >= 0 && col <= out_width;
+    {
+      out[get_index(row, col, out_width, out_height)] = 
+        out[get_index(out_height-1-row, col, out_width, out_height)];
+    }
+  }
+  
+  return out;
+}
