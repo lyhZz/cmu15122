@@ -1,0 +1,22 @@
+/* Really, really broken implementations of check_word and
+ * check_text_better. Still satisfies all contracts.
+ */
+
+bool check_word(string[] dict, int d, string w)
+//@requires \length(dict) == d;
+//@requires is_sorted(dict, 0, d);
+//@requires no_dupes(dict,0,d);
+{
+  return true;
+}
+
+int check_text_better(string[] dict, int d, string[] text, int t, string[] miss)
+//@requires \length(dict) == d;
+//@requires \length(text) == t;
+//@requires \length(miss) >= t;
+//@requires is_sorted(dict, 0, d) && no_dupes(dict, 0, d);
+//@ensures 0 <= \result && \result <= t;
+//@ensures is_sorted(miss, 0, \result) && no_dupes(miss, 0, \result);
+{
+  return 0;  // told you it was awful!
+}

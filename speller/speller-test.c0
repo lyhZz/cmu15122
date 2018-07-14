@@ -1,0 +1,70 @@
+#use <conio>
+#use <util>
+int main() {
+  
+  int correct_miss_size;
+  int textsz;
+  string[] text;
+  string[] misspelled;
+  string[] correct;
+  string[] dict = string_bundle_array(read_words("texts/dict.txt"));
+  int dictsz = 415890;
+  
+  assert(check_word(dict, dictsz, "camera"));
+  assert(check_word(dict, dictsz, "shoes"));
+  assert(!check_word(dict, dictsz, "damnc0"));
+  assert(!check_word(dict, dictsz, "ptrisgood"));
+  
+  textsz = 50;
+  correct_miss_size = 3;
+  text = string_bundle_array(read_words("texts/sloth.txt"));
+  misspelled = alloc_array(string, textsz);
+  assert(check_text_better(dict, dictsz, text, textsz, misspelled) == correct_miss_size);
+  correct = parse_tokens("algee energie idlleness");
+  for (int i = 0; i < correct_miss_size; i++) {
+    assert(string_compare(misspelled[i], correct[i]) == 0);
+  }
+  
+  textsz = 7;
+  correct_miss_size = 3;
+  text = parse_tokens("awf2l error wit6h only corre2ct corre2ct ability");
+  correct = parse_tokens("awf2l corre2ct wit6h");
+  misspelled = alloc_array(string, textsz);
+  assert(check_text_better(dict, dictsz, text, textsz, misspelled) == correct_miss_size);
+  correct = parse_tokens("awf2l corre2ct wit6h");
+  for (int i = 0; i < correct_miss_size; i++) {
+    assert(string_compare(misspelled[i], correct[i]) == 0);
+  }
+  
+  textsz = 9;
+  correct_miss_size = 5;
+  text = parse_tokens("ohhohh ohhohh opddh oops0s iqpwe cxas fun ohhohh protocol");
+  correct = parse_tokens("cxas iqpwe ohhohh oops0s opddh");
+  misspelled = alloc_array(string, textsz);
+  assert(check_text_better(dict, dictsz, text, textsz, misspelled) == correct_miss_size);
+  for (int i = 0; i < correct_miss_size; i++) {
+    assert(string_compare(misspelled[i], correct[i]) == 0);
+  }
+  
+  textsz = 8;
+  correct_miss_size = 0;
+  text = parse_tokens("format text spell test test open save test format");
+  correct = parse_tokens("");
+  misspelled = alloc_array(string, textsz);
+  assert(check_text_better(dict, dictsz, text, textsz, misspelled) == correct_miss_size);
+  for (int i = 0; i < correct_miss_size; i++) {
+    assert(string_compare(misspelled[i], correct[i]) == 0);
+  }
+  
+  textsz = 10;
+  correct_miss_size = 2;
+  text = parse_tokens("phone text human door eers eers safety pionerer disk image");
+  correct = parse_tokens("eers pionerer");
+  misspelled = alloc_array(string, textsz);
+  assert(check_text_better(dict, dictsz, text, textsz, misspelled) == correct_miss_size);
+  for (int i = 0; i < correct_miss_size; i++) {
+    assert(string_compare(misspelled[i], correct[i]) == 0);
+  }
+  
+  return 0;
+}

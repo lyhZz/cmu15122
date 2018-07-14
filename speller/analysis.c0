@@ -1,0 +1,72 @@
+#use <conio>
+#use <util>
+#use <args>
+int main() {
+  args_t args = args_parse();
+  int argc = args->argc;
+  string[] argv = args->argv;
+  
+  if (argc != 2) {
+    println("Invalid number of arguments!");
+    return 1;
+  }
+  
+  bundle_t dictsb = read_words(argv[0]);
+  bundle_t textsb = read_words(argv[1]);
+  
+  int dictsz = string_bundle_length(dictsb);
+  int textsz = string_bundle_length(textsb);
+  
+  string[] dict = string_bundle_array(dictsb);
+  string[] text = string_bundle_array(textsb);
+  
+  string[] misspelled = alloc_array(string, textsz);
+  int misssz = check_text_better(dict, dictsz, text, textsz, misspelled);
+  
+  print("There are ");
+  printint(misssz);
+  println(" misspelled words in the text.");
+  println("");
+  
+  int len8ctr = 0;
+  
+  for (int i = 0; i < misssz; i++) {
+    if (string_length(misspelled[i]) == 8) len8ctr++;
+  }
+  
+  print("There are ");
+  printint(len8ctr);
+  println(" misspelled words of length 8 in the text.");
+  println("");
+  
+  int len15ctr = 0;
+  
+  println("Here are the first 4 misspelled words of length 15 in the text:");
+  
+  for (int i = 0; i < misssz && len15ctr < 4; i++) {
+    if (string_length(misspelled[i]) == 15) {
+      printint(len15ctr+1);
+      print(". ");
+      println(misspelled[i]);
+      len15ctr++;
+    }
+  }
+  println("");
+  
+  if (misssz > 0) {
+    print("The alphabetically-last misspelled word in the text is ");
+    print(misspelled[misssz-1]);
+    print(" and appears ");
+    int lastctr = 0;
+    for (int i = 0; i < misssz; i++) {
+      if (string_compare(misspelled[i], misspelled[misssz-1]) == 0) lastctr++;
+    }
+    printint(lastctr);
+    println(" times.");
+  }
+  else {
+    println("There are no misspelled words.");
+  }
+  
+  return 0;
+}

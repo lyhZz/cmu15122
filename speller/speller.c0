@@ -1,0 +1,182 @@
+#use <conio>
+#use <util>
+
+bool check_word(string[] dict, int d, string w)
+//@requires \length(dict) == d;
+//@requires is_sorted(dict, 0, d) && no_dupes(dict, 0, d);
+{
+  int lo = 0;
+  int hi = d;
+  int mid;
+  while (lo < hi)
+  //@loop_invariant 0 <= lo && lo <= hi && hi <= d;
+  //@loop_invariant (lo == 0 || string_compare(dict[lo-1], w) < 0);
+  //@loop_invariant (hi == d || string_compare(dict[hi], w) > 0);
+  {
+    mid = lo + (hi - lo) / 2;
+    //@assert lo <= mid && mid < hi;
+    if (string_compare(dict[mid], w) == 0)
+      return true;
+    else if (string_compare(dict[mid], w) < 0)
+      lo = mid + 1;
+    else /*@assert string_compare(dict[mid], w) > 0;@*/
+      hi = mid;
+  }
+  //@assert lo == hi;
+  return false;
+}
+
+bool word_is_in(string[] dict, int d, string w)
+//@requires \length(dict) >= d;
+{
+  for (int i = 0; i < d; i++)
+  //@loop_invariant i >= 0 && i <= d;
+  {
+    if (string_compare(dict[i], w) == 0)
+      return true;
+  }
+  return false;
+}
+
+int check_text_naive(string[] dict, int d, string[] text, int t, string[] miss)
+//@requires \length(dict) == d;
+//@requires \length(text) == t;
+//@requires \length(miss) >= t;
+//@requires is_sorted(dict, 0, d) && no_dupes(dict, 0, d);
+//@ensures 0 <= \result && \result <= t;
+//@ensures no_dupes(miss, 0, \result);
+{
+  int ctr = 0;
+  for (int i = 0; i < t; i++)
+  //@loop_invariant 0 <= i && i <= t;
+  //@loop_invariant ctr <= t;
+  {
+    if (!check_word(dict, d, text[i])) {
+      if (!word_is_in(miss, ctr, text[i])) {
+        ctr++;
+        miss[ctr] = text[i];
+      }
+    }
+  }
+  return ctr;
+}
+
+int check_sorted_text(string[] dict, int d, string[] text, int t, string[] miss)
+//@requires \length(dict) == d;
+//@requires \length(text) >= t;
+//@requires \length(miss) >= t;
+//@requires is_sorted(dict, 0, d) && no_dupes(dict, 0, d);
+//@requires is_sorted(text, 0, t);
+//@requires no_dupes(text, 0, t);
+//@ensures 0 <= \result && \result <= t;
+//@ensures is_sorted(miss, 0, \result) && no_dupes(miss, 0, \result);
+{
+  int dicti = 0;
+  int missi = 0;
+  for (int texti = 0; texti < t; texti++)
+  //@loop_invariant dicti >= 0 && dicti <= d;
+  //@loop_invariant texti >= 0  && texti <= t;
+  {
+    while (dicti < d && string_compare(dict[dicti], text[texti]) < 0)
+    //@loop_invariant dicti >= 0 && dicti <= d;
+    {
+      dicti++;
+    }
+    if (dicti == d) {
+      for (int i = texti; i < t; i++) {
+        miss[missi] = text[i];
+        missi++;
+      }
+      return missi;
+    }
+    if (string_compare(dict[dicti], text[texti]) != 0) {
+      miss[missi] = text[texti];
+      missi++;
+    }
+    else {
+      dicti++;
+    }
+  }
+  return missi;
+}
+
+int merge(string[] array, int lo1, int hi1, int lo2, int hi2)
+//@requires 0<=lo1 && lo1<hi1 && hi1<=lo2 && lo2<hi2 && hi2<=\length(array);
+//@requires 0 <= lo1;
+//@requires lo1 < hi1;
+//@requires hi1 <= lo2;
+//@requires lo2 < hi2;
+//@requires hi2 <= \length(array);
+//@requires is_sorted(array, lo1, hi1) && no_dupes(array, lo1, hi1);
+//@requires is_sorted(array, lo2, hi2) && no_dupes(array, lo2, hi2);
+//@ensures 0 <= \result && \result <= hi2 - lo1;
+//@ensures is_sorted(array,lo1,lo1+\result);
+//@ensures no_dupes(array,lo1,lo1+\result);
+{
+  string[] temp = alloc_array(string, hi2-lo1-(lo2-hi1));
+  int i = lo1;
+  int j = lo2;
+  int k = 0;
+
+  while (i < hi1 && j < hi2)
+  //@loop_invariant lo1 <= i && i <= hi1;
+  //@loop_invariant lo2 <= j && j <= hi2;
+  //@loop_invariant 0 <= k && k < hi2-lo1;
+  {
+    if (string_compare(array[i], array[j]) < 0) {
+      temp[k] = array[i];
+      i++;
+    }
+    else if (string_compare(array[i], array[j]) == 0) {
+      temp[k] = array[i];
+      i++;
+      j++;
+    }
+    else { //@assert string_compare(array[i], array[j]) > 0;
+      temp[k] = array[j];
+      j++;
+    }
+    k++;
+  }
+
+  //@assert i == hi1 || j == hi2;
+  // Copy the rest of the array segments
+  while (i < hi1) { temp[k] = array[i]; i++; k++; }
+  while (j < hi2) { temp[k] = array[j]; j++; k++; }
+
+  // Copy sorted array back into array
+  for (int a = 0; a < k; a++)
+    array[lo1+a] = temp[a];
+  return k;
+}
+
+int mergesort(string[] array, int lo, int hi)
+//@requires 0 <= lo && lo <= hi && hi <= \length(array);
+//@ensures is_sorted(array, lo, hi);
+{
+  if ( hi - lo <= 1 ) return hi - lo;
+  int middle = lo + (hi - lo) / 2;
+  int outvalue1 = mergesort(array, lo, middle);
+  int outvalue2 = mergesort(array, middle, hi);
+  return merge(array, lo, lo + outvalue1, middle, middle + outvalue2);
+}
+
+int check_text_better(string[] dict, int d, string[] text, int t, string[] miss)
+//@requires \length(dict) == d;
+//@requires \length(text) == t;
+//@requires \length(miss) >= t;
+//@requires is_sorted(dict, 0, d) && no_dupes(dict, 0, d);
+//@ensures 0 <= \result && \result <= t;
+//@ensures is_sorted(miss, 0, \result) && no_dupes(miss, 0, \result);
+{
+  int textsz = mergesort(text, 0, t);
+  int dictsz = mergesort(dict, 0, d);
+//  println("Text:");
+//  for (int i = 0; i < textsz; i++)
+//    println(text[i]);
+//  println("");
+  int misssz = check_sorted_text(dict, d, text, textsz, miss);
+//  for (int i = 0; i < misssz; i++)
+//    println(miss[i]);
+  return misssz;
+}
