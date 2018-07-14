@@ -1,0 +1,118 @@
+/*
+ * Dictionaries, implemented as assocation lists
+ *
+ * 15-122 Principles of Imperative Computation
+ */
+
+#use <string>
+#use "queue_of_string.c0"
+
+/* Interface to dictionaries */
+
+// typedef ______* dict_t;
+typedef struct dict_header* dict_t;
+
+dict_t dict_new()
+  /*@ensures \result != NULL; @*/;
+
+// Returns NULL if no definition is found
+queue_t dict_lookup(dict_t D, string name)
+  /*@requires D != NULL; @*/;
+
+void dict_insert(dict_t D, string name, queue_t def)
+  /*@requires D != NULL; @*/
+  /*@requires def != NULL; @*/;
+
+/* Implementation of dictionaries as association lists */
+
+/* Association lists */
+typedef struct alist_node alist;
+struct alist_node {
+  string name;
+  queue_t def;
+  alist* next;
+};
+
+bool is_assoclist_segment(alist* start, alist* end) {
+  if (start == NULL) return false;
+  if (start == end) return true;
+  return start->def != NULL && is_assoclist_segment(start->next, end);
+}
+
+bool is_acyclic_assoclist(alist* p) {
+  if (p == NULL || p->next == NULL) return true;
+
+  alist* tortise = p;
+  alist* hare = p->next;
+  if (p->def == NULL) return false;
+  while (tortise != hare) 
+  //@loop_invariant is_assoclist_segment(tortise, hare);
+  {
+    if (hare->next == NULL || hare->next->next == NULL) return true;
+    if (hare->def == NULL || hare->next->def == NULL) return false;
+    tortise = tortise->next;
+    hare = hare->next->next;
+  }
+
+  return false;
+}
+
+/* NULL is a valid (empty) association list; the only requirement we
+ * make on association lists is that they be acyclic. */
+
+/* Dictionaries */
+typedef struct dict_header dict;
+struct dict_header {
+  alist* assoclist;
+};
+
+bool is_dict(dict* D) {
+  return D != NULL && is_acyclic_assoclist(D->assoclist);
+}
+
+/* Allocating a new dictionary */
+dict* dict_new()
+//@ensures is_dict(\result);
+{
+  dict* D = alloc(dict);
+  D->assoclist = NULL;
+  return D;
+}
+
+queue_t dict_lookup(dict* D, string name)
+//@requires is_dict(D);
+{
+  for (alist* p = D->assoclist; p != NULL; p = p->next) 
+  //@loop_invariant is_acyclic_assoclist(p);
+  {
+    if (string_equal(name, p->name)) {
+      return p->def;
+    }
+  }
+
+  return NULL;
+}
+
+void dict_insert(dict* D, string name, queue_t def)
+//@requires is_dict(D);
+//@requires def != NULL;
+//@ensures is_dict(D);
+//@ensures dict_lookup(D, name) != NULL;
+{
+  for (alist* p = D->assoclist; p != NULL; p = p->next) 
+  //@loop_invariant is_acyclic_assoclist(p);
+  {
+    if (string_equal(name, p->name)) {
+      p->def = def;
+      return;
+    }
+  }
+  
+  alist* p = alloc(struct alist_node);
+  p->name = name;
+  p->def = def;
+  p->next = D->assoclist;
+  D->assoclist = p;
+  return;
+}
+

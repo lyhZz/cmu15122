@@ -1,0 +1,58 @@
+/*
+ * Clac, stack-based calculator language
+ *
+ * 15-122 Principles of Imperative Computation
+ */
+
+#use <string>
+#use <parse>
+#use <conio>
+#use <args>
+#use <util>
+
+/* From the perspective of the clac-main.c0 file, state_t is an
+ * abstract type. (typedef ____* state_t) This file contains the
+ * implementation of the state_t type. You will add new fields to this
+ * struct when you do task 4. */
+struct state_header {
+  /* Nothing in here initially */
+};
+typedef struct state_header* state_t;
+state_t init_state()
+//@ensures \result != NULL;
+{
+  return alloc(struct state_header);
+}
+
+/* Main clac interpreter. */
+/* Return true: clac top-level interpreter will expect more input */
+/* Return false: clac top-level interpreter will exit */
+bool eval(queue_t Q, stack_t S, state_t ST)
+//@requires Q != NULL && S != NULL && ST != NULL;
+//@ensures \result == false || queue_empty(Q);
+{
+  while (!queue_empty(Q)) {
+    string tok = deq(Q); /* Is this dequeue safe? */
+    // Uncommenting these lines might help with debugging:
+    // print("Read: "); print(tok); print("\n");
+    if (string_equal(tok, "print")) {
+      int x = pop(S); /* This line is unsafe and must be fixed! */
+      printint(x); print("\n");
+    } else if (string_equal(tok, "quit")) {
+      return false;
+    } else {
+      /* Not defined as an operation name, should be an int */
+      int* p = parse_int(tok, 10);
+      if (p == NULL) { /* not an int */
+        /* call error(msg) which prints msg and aborts */
+        error(string_join("undefined token ", tok));
+      }
+      push(S, *p);
+    }
+  }
+
+  /* When you return "true", don't pop anything off the stack! When we
+   * grade your function, we'll check that the stack contains the
+   * integers we expect. */
+  return true;
+}

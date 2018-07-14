@@ -1,0 +1,82 @@
+/*
+ * Clac, interface to a stack-based calculator language
+ *
+ * 15-122 Principles of Imperative Computation
+ */
+
+#use <string>
+#use <parse>
+#use <conio>
+#use <args>
+
+void print_top(stack_t S) 
+//@requires S != NULL;
+{
+  if (stack_empty(S)) {
+    println("Stack is now empty");
+    return;
+  }
+
+  print("Stack is now ["); 
+  int top = pop(S);
+  if (stack_empty(S)) {
+    printint(top); println("]");
+    push(S, top);
+    return;
+  }
+
+  int next = pop(S);
+  print(stack_empty(S) ? "" : "..,"); 
+  printint(next); print(","); printint(top); println("]");
+  push(S, next); push(S, top);
+  return;
+}
+
+void top_level(queue_t Q) 
+//@requires Q != NULL;
+{
+  /* Q is input queue */
+  stack_t S = stack_new(); /* operand stack */
+  state_t ST = init_state(); /* the state, which is abstract to this file */
+  bool cont = true;
+
+  print("Clac top level\n");
+  while (cont) {
+    // If there is nothing to be done on the queue and more input, get input
+    if (queue_empty(Q)) {
+      if (!eof()) {
+        print("clac>> ");
+        flush();
+        input_line(Q);
+      } else {
+        return;
+      }
+    }
+
+    cont = eval(Q, S, ST);
+    //@assert !cont || queue_empty(Q);
+    print_top(S);
+  }
+
+  print("Bye!\n");
+  return;
+}
+
+int main() {
+  /* pass file names on command line, no flags */
+  /* these will be processed in order */
+  args_t args = args_parse();
+  int argc = args->argc;
+  queue_t Q = queue_new();
+
+  for (int i = 0; i < argc; i++)
+  //@loop_invariant 0 <= i;
+  {
+    string filename = args->argv[i];
+    print("Loading file "); print(filename); print("\n");
+    input_file(args->argv[i], Q);
+  }
+
+  top_level(Q);
+  return 0;
+}
