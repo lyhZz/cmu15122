@@ -152,7 +152,7 @@ int merge(string[] array, int lo1, int hi1, int lo2, int hi2)
 
 int mergesort(string[] array, int lo, int hi)
 //@requires 0 <= lo && lo <= hi && hi <= \length(array);
-//@ensures is_sorted(array, lo, hi);
+//@ensures is_sorted(array, lo, lo + \result);
 {
   if ( hi - lo <= 1 ) return hi - lo;
   int middle = lo + (hi - lo) / 2;
@@ -170,13 +170,7 @@ int check_text_better(string[] dict, int d, string[] text, int t, string[] miss)
 //@ensures is_sorted(miss, 0, \result) && no_dupes(miss, 0, \result);
 {
   int textsz = mergesort(text, 0, t);
-  int dictsz = mergesort(dict, 0, d);
-//  println("Text:");
-//  for (int i = 0; i < textsz; i++)
-//    println(text[i]);
-//  println("");
+  //int dictsz = mergesort(dict, 0, d);
   int misssz = check_sorted_text(dict, d, text, textsz, miss);
-//  for (int i = 0; i < misssz; i++)
-//    println(miss[i]);
   return misssz;
 }

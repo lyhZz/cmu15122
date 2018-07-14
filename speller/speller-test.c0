@@ -7,31 +7,48 @@ int main() {
   string[] text;
   string[] misspelled;
   string[] correct;
-  string[] dict = string_bundle_array(read_words("texts/dict.txt"));
-  int dictsz = 415890;
+  //string[] dict = string_bundle_array(read_words("texts/dict.txt"));
+  //int dictsz = string_bundle_length(read_words("texts/dict.txt"));
+  string[] dict = parse_tokens("ability camera disk door error format fun human image only open phone protocol safety save shoes spell test text zoo");
+  int dictsz = 20;
+  string[] mydict = parse_tokens("a b c d e f g");
+  int mydictsz = 7;
   
   assert(check_word(dict, dictsz, "camera"));
   assert(check_word(dict, dictsz, "shoes"));
   assert(!check_word(dict, dictsz, "damnc0"));
   assert(!check_word(dict, dictsz, "ptrisgood"));
   
-  textsz = 50;
-  correct_miss_size = 3;
-  text = string_bundle_array(read_words("texts/sloth.txt"));
-  misspelled = alloc_array(string, textsz);
-  assert(check_text_better(dict, dictsz, text, textsz, misspelled) == correct_miss_size);
-  correct = parse_tokens("algee energie idlleness");
-  for (int i = 0; i < correct_miss_size; i++) {
-    assert(string_compare(misspelled[i], correct[i]) == 0);
-  }
+  assert(check_word(mydict, mydictsz, "a"));
+  assert(check_word(mydict, mydictsz, "b"));
+  assert(check_word(mydict, mydictsz, "c"));
+  assert(check_word(mydict, mydictsz, "d"));
+  assert(check_word(mydict, mydictsz, "e"));
+  assert(check_word(mydict, mydictsz, "f"));
+  assert(check_word(mydict, mydictsz, "g"));
+  
+  assert(!check_word(mydict, mydictsz, "h"));
+  assert(!check_word(mydict, mydictsz, "i"));
+  assert(!check_word(mydict, mydictsz, "j"));
+  assert(!check_word(mydict, mydictsz, "k"));
+  assert(!check_word(mydict, mydictsz, "l"));
+  assert(!check_word(mydict, mydictsz, "m"));
+  assert(!check_word(mydict, mydictsz, "n"));
+  
+  assert(!check_word(mydict, mydictsz, "A"));
+  assert(!check_word(mydict, mydictsz, "B"));
+  assert(!check_word(mydict, mydictsz, "C"));
+  assert(!check_word(mydict, mydictsz, "D"));
+  assert(!check_word(mydict, mydictsz, "E"));
+  assert(!check_word(mydict, mydictsz, "F"));
+  assert(!check_word(mydict, mydictsz, "G"));
   
   textsz = 7;
   correct_miss_size = 3;
-  text = parse_tokens("awf2l error wit6h only corre2ct corre2ct ability");
-  correct = parse_tokens("awf2l corre2ct wit6h");
+  text = parse_tokens("awfrl error witph only correrct correrct ability");
+  correct = parse_tokens("awfrl correrct witph");
   misspelled = alloc_array(string, textsz);
   assert(check_text_better(dict, dictsz, text, textsz, misspelled) == correct_miss_size);
-  correct = parse_tokens("awf2l corre2ct wit6h");
   for (int i = 0; i < correct_miss_size; i++) {
     assert(string_compare(misspelled[i], correct[i]) == 0);
   }
@@ -48,7 +65,7 @@ int main() {
   
   textsz = 8;
   correct_miss_size = 0;
-  text = parse_tokens("format text spell test test open save test format");
+  text = parse_tokens("format text spell test open save test format");
   correct = parse_tokens("");
   misspelled = alloc_array(string, textsz);
   assert(check_text_better(dict, dictsz, text, textsz, misspelled) == correct_miss_size);

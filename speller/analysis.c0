@@ -14,11 +14,14 @@ int main() {
   bundle_t dictsb = read_words(argv[0]);
   bundle_t textsb = read_words(argv[1]);
   
+  bundle_t textsb_bak = read_words(argv[1]);
+  
   int dictsz = string_bundle_length(dictsb);
   int textsz = string_bundle_length(textsb);
   
   string[] dict = string_bundle_array(dictsb);
   string[] text = string_bundle_array(textsb);
+  string[] text_bak = string_bundle_array(textsb_bak);
   
   string[] misspelled = alloc_array(string, textsz);
   int misssz = check_text_better(dict, dictsz, text, textsz, misspelled);
@@ -58,8 +61,8 @@ int main() {
     print(misspelled[misssz-1]);
     print(" and appears ");
     int lastctr = 0;
-    for (int i = 0; i < misssz; i++) {
-      if (string_compare(misspelled[i], misspelled[misssz-1]) == 0) lastctr++;
+    for (int i = 0; i < textsz; i++) {
+      if (string_compare(text_bak[i], misspelled[misssz-1]) == 0) lastctr++;
     }
     printint(lastctr);
     println(" times.");
