@@ -56,39 +56,31 @@ bool eval(queue_t Q, stack_t S, state_t ST)
     else if (string_equal(tok, "+")) {
       int added1 = 0;
       if (stack_empty(S)) {
-        println("Error: not enough elements on stack");
-        return false;
+        error("Error: not enough elements on stack");
       }
       else {
         added1 = pop(S);
       }
       if (stack_empty(S)) {
-        println("Error: not enough elements on stack");
-        return false;
+        error("Error: not enough elements on stack");
       }
       else {
         int added2 = pop(S);
-        if (added1 <= int_max() - added2) {
-          int out = added1 + added2;
-          push(S, out);
-          printint(out); print("\n");
-        }
-        else
-          println("Int too large!");
+        int out = added1 + added2;
+        push(S, out);
+        printint(out); print("\n");
       }
     }
     else if (string_equal(tok, "-")) {
       int subtracted = 0;
       if (stack_empty(S)) {
-        println("Error: not enough elements on stack");
-        return false;
+        error("Error: not enough elements on stack");
       }
       else {
         subtracted = pop(S);
       }
       if (stack_empty(S)) {
-        println("Error: not enough elements on stack");
-        return false;
+        error("Error: not enough elements on stack");
       }
       else {
         int ttl = pop(S);
@@ -100,54 +92,40 @@ bool eval(queue_t Q, stack_t S, state_t ST)
     else if (string_equal(tok, "*")) {
       int mult1 = 0;
       if (stack_empty(S)) {
-        println("Error: not enough elements on stack");
-        return false;
+        error("Error: not enough elements on stack");
       }
       else {
         mult1 = pop(S);
       }
       if (stack_empty(S)) {
-        println("Error: not enough elements on stack");
-        return false;
+        error("Error: not enough elements on stack");
       }
       else {
         int mult2 = pop(S);
-        if (mult1 < int_max() / mult2) {
-          int out = mult1 * mult2;
-          push(S, out);
-          printint(out); print("\n");
-        }
-        else
-          println("Int too large!");
+        int out = mult1 * mult2;
+        push(S, out);
+        printint(out); print("\n");
       }
     }
     else if (string_equal(tok, "**")) {
       int power = 0;
       if (stack_empty(S)) {
-        println("Error: not enough elements on stack");
-        return false;
+        error("Error: not enough elements on stack");
       }
       else {
         power = pop(S);
         if (power < 0) {
-          println("Error: power cannot be less than zero!");
-          return false;
+          error("Error: power cannot be less than zero!");
         }
       }
       if (stack_empty(S)) {
-        println("Error: not enough elements on stack");
-        return false;
+        error("Error: not enough elements on stack");
       }
       else {
         int base = pop(S);
         int out = 1;
         for (int i = 0; i < power; i++)
-          if (out <= int_max() / base)
-            out *= base;
-          else {
-            println("Int too large!");
-            i = power;
-          }
+          out *= base;
         push(S, out);
         printint(out); print("\n");
       }
@@ -155,19 +133,16 @@ bool eval(queue_t Q, stack_t S, state_t ST)
     else if (string_equal(tok, "/")) {
       int divident = 0;
       if (stack_empty(S)) {
-        println("Error: not enough elements on stack");
-        return false;
+        error("Error: not enough elements on stack");
       }
       else {
         divident = pop(S);
         if (divident == 0) {
-          println("Error: division by zero");
-          return false;
+          error("Error: division by zero");
         }
       }
       if (stack_empty(S)) {
-        println("Error: not enough elements on stack");
-        return false;
+        error("Error: not enough elements on stack");
       }
       else {
         int divided = pop(S);
@@ -179,19 +154,16 @@ bool eval(queue_t Q, stack_t S, state_t ST)
     else if (string_equal(tok, "%")) {
       int divident = 0;
       if (stack_empty(S)) {
-        println("Error: not enough elements on stack");
-        return false;
+        error("Error: not enough elements on stack");
       }
       else {
         divident = pop(S);
         if (divident == 0) {
-          println("Error: division by zero");
-          return false;
+          error("Error: division by zero");
         }
       }
       if (stack_empty(S)) {
-        println("Error: not enough elements on stack");
-        return false;
+        error("Error: not enough elements on stack");
       }
       else {
         int divided = pop(S);
@@ -203,15 +175,13 @@ bool eval(queue_t Q, stack_t S, state_t ST)
     else if (string_equal(tok, "<")) {
       int y = 0;
       if (stack_empty(S)) {
-        println("Error: not enough elements on stack");
-        return false;
+        error("Error: not enough elements on stack");
       }
       else {
         y = pop(S);
       }
       if (stack_empty(S)) {
-        println("Error: not enough elements on stack");
-        return false;
+        error("Error: not enough elements on stack");
       }
       else {
         int x = pop(S);
