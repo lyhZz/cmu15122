@@ -15,7 +15,7 @@
  * implementation of the state_t type. You will add new fields to this
  * struct when you do task 4. */
 struct state_header {
-  /* Nothing in here initially */
+  
 };
 typedef struct state_header* state_t;
 state_t init_state()
