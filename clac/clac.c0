@@ -15,13 +15,15 @@
  * implementation of the state_t type. You will add new fields to this
  * struct when you do task 4. */
 struct state_header {
-  
+  dict_t dict;
 };
 typedef struct state_header* state_t;
 state_t init_state()
 //@ensures \result != NULL;
 {
-  return alloc(struct state_header);
+  state_t state = alloc(struct state_header);
+  state->dict = dict_new();
+  return state;
 }
 
 /* Main clac interpreter. */
@@ -219,7 +221,7 @@ bool eval(queue_t Q, stack_t S, state_t ST)
     }
     
     else if (string_equal(tok, "skip")) {
-      if (stack_empty(S))
+      if (queue_empty(S))
         error("not enough elements on stack");
       int n = pop(S);
       if (n < 0)
@@ -230,6 +232,10 @@ bool eval(queue_t Q, stack_t S, state_t ST)
             error("unexpected end of input");
           deq(Q);
         }
+    }
+    
+    else if (string_equal(tok, ":")) {
+      
     }
     
     else {
