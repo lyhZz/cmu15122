@@ -37,16 +37,14 @@ bool eval(queue_t Q, stack_t S, state_t ST)
       tok = deq(Q); /* Is this dequeue safe? */
     else
       return true;
+
     // Uncommenting these lines might help with debugging:
     // print("Read: "); print(tok); print("\n");
     if (string_equal(tok, "print")) {
-      if (stack_empty(S)) {
-        println("Stack is empty!");
-      }
-      else {
-        int x = pop(S); /* This line is unsafe and must be fixed! */
-        printint(x); print("\n");
-      }
+      if (stack_empty(S))
+        error("not enough elements on stack");
+      int x = pop(S); /* This line is unsafe and must be fixed! */
+      printint(x); print("\n");
     }
     
     else if (string_equal(tok, "quit")) {
@@ -54,151 +52,192 @@ bool eval(queue_t Q, stack_t S, state_t ST)
     }
     
     else if (string_equal(tok, "+")) {
-      int added1 = 0;
-      if (stack_empty(S)) {
-        error("Error: not enough elements on stack");
-      }
-      else {
-        added1 = pop(S);
-      }
-      if (stack_empty(S)) {
-        error("Error: not enough elements on stack");
-      }
-      else {
-        int added2 = pop(S);
-        int out = added1 + added2;
-        push(S, out);
-        printint(out); print("\n");
-      }
+      if (stack_empty(S))
+        error("not enough elements on stack");
+      int added1 = pop(S);
+      if (stack_empty(S))
+        error("not enough elements on stack");
+      int added2 = pop(S);
+      int out = added1 + added2;
+      push(S, out);
+      printint(out); print("\n");
     }
+    
     else if (string_equal(tok, "-")) {
-      int subtracted = 0;
-      if (stack_empty(S)) {
-        error("Error: not enough elements on stack");
-      }
-      else {
-        subtracted = pop(S);
-      }
-      if (stack_empty(S)) {
-        error("Error: not enough elements on stack");
-      }
-      else {
-        int ttl = pop(S);
-        int out = ttl - subtracted;
-        push(S, out);
-        printint(out); print("\n");
-      }
+      if (stack_empty(S))
+        error("not enough elements on stack");
+      int subtracted = pop(S);
+      if (stack_empty(S))
+        error("not enough elements on stack");
+      int ttl = pop(S);
+      int out = ttl - subtracted;
+      push(S, out);
+      printint(out); print("\n");
     }
+    
     else if (string_equal(tok, "*")) {
-      int mult1 = 0;
-      if (stack_empty(S)) {
-        error("Error: not enough elements on stack");
-      }
-      else {
-        mult1 = pop(S);
-      }
-      if (stack_empty(S)) {
-        error("Error: not enough elements on stack");
-      }
-      else {
-        int mult2 = pop(S);
-        int out = mult1 * mult2;
-        push(S, out);
-        printint(out); print("\n");
-      }
+      if (stack_empty(S))
+        error("not enough elements on stack");
+      int mult1 = pop(S);
+      if (stack_empty(S))
+        error("not enough elements on stack");
+      int mult2 = pop(S);
+      int out = mult1 * mult2;
+      push(S, out);
+      printint(out); print("\n");
     }
+    
     else if (string_equal(tok, "**")) {
-      int power = 0;
-      if (stack_empty(S)) {
-        error("Error: not enough elements on stack");
-      }
-      else {
-        power = pop(S);
-        if (power < 0) {
-          error("Error: power cannot be less than zero!");
-        }
-      }
-      if (stack_empty(S)) {
-        error("Error: not enough elements on stack");
-      }
-      else {
-        int base = pop(S);
-        int out = 1;
-        for (int i = 0; i < power; i++)
-          out *= base;
-        push(S, out);
-        printint(out); print("\n");
-      }
+      if (stack_empty(S))
+        error("not enough elements on stack");
+      int power = pop(S);
+      if (power < 0)
+        error("power cannot be less than zero!");
+      if (stack_empty(S))
+        error("not enough elements on stack");
+      int base = pop(S);
+      int out = 1;
+      for (int i = 0; i < power; i++)
+        out *= base;
+      push(S, out);
+      printint(out); print("\n");
     }
+    
     else if (string_equal(tok, "/")) {
-      int divident = 0;
-      if (stack_empty(S)) {
-        error("Error: not enough elements on stack");
-      }
-      else {
-        divident = pop(S);
-        if (divident == 0) {
-          error("Error: division by zero");
-        }
-      }
-      if (stack_empty(S)) {
-        error("Error: not enough elements on stack");
-      }
-      else {
-        int divided = pop(S);
-        int out = divided / divident;
-        push(S, out);
-        printint(out); print("\n");
-      }
+      if (stack_empty(S))
+        error("not enough elements on stack");
+      int divident = pop(S);
+      if (divident == 0)
+        error("division by zero");
+      if (stack_empty(S))
+        error("not enough elements on stack");
+      int divided = pop(S);
+      if (divided == int_min() && divident == -1)
+        error("int_min() divided by -1");
+      int out = divided / divident;
+      push(S, out);
+      printint(out); print("\n");
     }
+    
     else if (string_equal(tok, "%")) {
-      int divident = 0;
-      if (stack_empty(S)) {
-        error("Error: not enough elements on stack");
-      }
-      else {
-        divident = pop(S);
-        if (divident == 0) {
-          error("Error: division by zero");
-        }
-      }
-      if (stack_empty(S)) {
-        error("Error: not enough elements on stack");
-      }
-      else {
-        int divided = pop(S);
-        int out = divided % divident;
-        push(S, out);
-        printint(out); print("\n");
-      }
+      if (stack_empty(S))
+        error("not enough elements on stack");
+      int divident = pop(S);
+      if (divident == 0)
+          error("division by zero");
+      if (stack_empty(S))
+        error("not enough elements on stack");
+      int divided = pop(S);
+      if (divided == int_min() && divident == -1)
+        error("int_min() divided by -1");
+      int out = divided % divident;
+      push(S, out);
+      printint(out); print("\n");
     }
+    
     else if (string_equal(tok, "<")) {
-      int y = 0;
-      if (stack_empty(S)) {
-        error("Error: not enough elements on stack");
-      }
-      else {
-        y = pop(S);
-      }
-      if (stack_empty(S)) {
-        error("Error: not enough elements on stack");
-      }
-      else {
-        int x = pop(S);
-        int out = 0;
-        if (x < y)
-          out = 1;
-        else
-          out = 0;
-        push(S, out);
-        printint(out); print("\n");
-      }
+      if (stack_empty(S))
+        error("not enough elements on stack");
+      int y = pop(S);
+      if (stack_empty(S))
+        error("not enough elements on stack");
+      int x = pop(S);
+      int out = 0;
+      if (x < y)
+        out = 1;
+      else
+        out = 0;
+      push(S, out);
+      printint(out); print("\n");
     }
+    
+    else if (string_equal(tok, "drop")) {
+      if (stack_empty(S))
+        error("not enough elements on stack");
+      int out = pop(S);
+      printint(out); print("\n");
+    }
+    
+    else if (string_equal(tok, "swap")) {
+      if (stack_empty(S))
+        error("not enough elements on stack");
+      int y = pop(S);
+      if (stack_empty(S))
+        error("not enough elements on stack");
+      int x = pop(S);
+      push(S, y);
+      push(S, x);
+      printint(x); print("\n");
+    }
+    
+    else if (string_equal(tok, "rot")) {
+      if (stack_empty(S))
+        error("not enough elements on stack");
+      int z = pop(S);
+      if (stack_empty(S))
+        error("not enough elements on stack");
+      int y = pop(S);
+      if (stack_empty(S))
+        error("not enough elements on stack");
+      int x = pop(S);
+      push(S, y);
+      push(S, z);
+      push(S, x);
+      printint(x); print("\n");
+    }
+    
+    else if (string_equal(tok, "if")) {
+      if (stack_empty(S))
+        error("not enough elements on stack");
+      int x = pop(S);
+      if (x != 0) {}
+      else
+        for (int i = 0; i < 3; i++) {
+          if (Q == NULL || queue_empty(Q))
+            error("unexpected end of input");
+          deq(Q);
+        }
+    }
+    
+    else if (string_equal(tok, "pick")) {
+      if (stack_empty(S))
+        error("not enough elements on stack");
+      int n = pop(S);
+      if (n < 0)
+        error("pick must be positive");
+      int[] arr = alloc_array(int, n);
+      for (int i = 0; i < n; i++) {
+        if (!stack_empty(S))
+          arr[i] = pop(S);
+        else
+          error("not enough elements on stack");
+      }
+      for (int i = n-1; i >= 0; i--)
+        push(S, arr[i]);
+      push(S, arr[n-1]);
+      printint(arr[n-1]); print("\n");
+    }
+    
+    else if (string_equal(tok, "skip")) {
+      if (stack_empty(S))
+        error("not enough elements on stack");
+      int n = pop(S);
+      if (n < 0)
+        error("skip must be nonnegative");
+      else
+        for (int i = 0; i < n; i++) {
+          if (Q == NULL || queue_empty(Q))
+            error("unexpected end of input");
+          deq(Q);
+        }
+    }
+    
     else {
       /* Not defined as an operation name, should be an int */
       int* p = parse_int(tok, 10);
       if (p == NULL) { /* not an int */
-        /* call error(msg) which prints msg and aborts */
+        /* call error(msg) which 
+        prints msg and aborts */
         error(string_join("undefined token ", tok));
       }
       push(S, *p);
