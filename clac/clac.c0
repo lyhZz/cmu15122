@@ -232,9 +232,8 @@ bool eval(queue_t Q, stack_t S, state_t ST)
 			int[] arr = alloc_array(int, n);
 			for (int i = 0; i < n; i++) {
 				if (!stack_empty(S))
-					arr[i] = pop(S);
-				else
 					error("not enough elements on stack");
+				arr[i] = pop(S);	
 			}
 			for (int i = n-1; i >= 0; i--)
 				push(S, arr[i]);
