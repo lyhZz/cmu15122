@@ -273,7 +273,7 @@ bool eval(queue_t Q, stack_t S, state_t ST)
 		}
 
 		else if (dict_lookup(ST->dict, tok) != NULL) {
-			if (!queue_empty(Q))
+			if (!queue_empty(A))
 				qpush(ST->qstack, A);
 			A = queue_read_only_copy(dict_lookup(ST->dict, tok));
 		}
