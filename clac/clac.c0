@@ -16,6 +16,7 @@
  * struct when you do task 4. */
 struct state_header {
   dict_t dict;
+  qstack_t qstack;
 };
 typedef struct state_header* state_t;
 state_t init_state()
@@ -23,6 +24,7 @@ state_t init_state()
 {
   state_t state = alloc(struct state_header);
   state->dict = dict_new();
+  state->qstack = qstack_new();
   return state;
 }
 
@@ -30,8 +32,8 @@ state_t init_state()
 /* Return true: clac top-level interpreter will expect more input */
 /* Return false: clac top-level interpreter will exit */
 bool eval(queue_t Q, stack_t S, state_t ST)
-//@requires Q != NULL && S != NULL && ST != NULL;
-//@ensures \result == false || queue_empty(Q);
+// //@requires Q != NULL && S != NULL && ST != NULL;
+// //@ensures \result == false || queue_empty(Q);
 {
   while (!queue_empty(Q)) {
     string tok = "";
@@ -221,8 +223,8 @@ bool eval(queue_t Q, stack_t S, state_t ST)
     }
     
     else if (string_equal(tok, "skip")) {
-      if (queue_empty(S))
-        error("not enough elements on stack");
+      if (queue_empty(Q))
+        error("not enough elements on queue");
       int n = pop(S);
       if (n < 0)
         error("skip must be nonnegative");
@@ -235,7 +237,25 @@ bool eval(queue_t Q, stack_t S, state_t ST)
     }
     
     else if (string_equal(tok, ":")) {
-      
+      if (queue_empty(Q))
+        error("unexpected end of input");
+      string key = deq(Q);
+      if (queue_empty(Q))
+        error("unexpected end of input");
+      queue_t def = queue_new();
+      string next = deq(Q);
+      while (string_compare(next, ";") != 0) {
+        enq(def, next);
+        if (queue_empty(Q))
+          error("unexpected end of input");
+        next = deq(Q);
+      }
+      dict_insert(ST->dict, key, def);
+    }
+    
+    else if (dict_lookup(ST->dict, tok) != NULL) {
+      qpush(ST->qstack, dict_lookup(ST->dict, tok));
+      Q = queue_read_only_copy(dict_lookup(ST->dict, tok));
     }
     
     else {
@@ -249,7 +269,8 @@ bool eval(queue_t Q, stack_t S, state_t ST)
       push(S, *p);
     }
   }
-
+  if (!qstack_empty(ST->qstack))
+    Q = qpop(ST->qstack);
   /* When you return "true", don't pop anything off the stack! When we
    * grade your function, we'll check that the stack contains the
    * integers we expect. */
