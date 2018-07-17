@@ -49,7 +49,7 @@ void trace(stack_t S, queue_t Q) {
   while (!queue_empty(A)) {
     print(deq(A)); print(" ");
   }
-  println("");
+  println("\n");
 }
 
 /* Main clac interpreter. */
@@ -308,7 +308,6 @@ bool eval(queue_t Q, stack_t S, state_t ST)
       A = qpop(ST->qstack);
     }
   }
-
   /* When you return "true", don't pop anything off the stack! When we
    * grade your function, we'll check that the stack contains the
    * integers we expect. */
