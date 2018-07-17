@@ -87,6 +87,8 @@ bool eval(queue_t Q, stack_t S, state_t ST)
       if (stack_empty(S))
         error("not enough elements on stack");
       int added2 = pop(S);
+      if (int_max() - added2 < added1)
+        error("overflow");
       int out = added1 + added2;
       push(S, out);
       printint(out); print("\n");
@@ -111,6 +113,8 @@ bool eval(queue_t Q, stack_t S, state_t ST)
       if (stack_empty(S))
         error("not enough elements on stack");
       int mult2 = pop(S);
+      if (int_max() / mult2 < mult1)
+        error("overflow");
       int out = mult1 * mult2;
       push(S, out);
       printint(out); print("\n");
@@ -126,8 +130,11 @@ bool eval(queue_t Q, stack_t S, state_t ST)
         error("not enough elements on stack");
       int base = pop(S);
       int out = 1;
-      for (int i = 0; i < power; i++)
+      for (int i = 0; i < power; i++) {
+        if (int_max() / base < out)
+          error("overflow");
         out *= base;
+      }
       push(S, out);
       printint(out); print("\n");
     }
