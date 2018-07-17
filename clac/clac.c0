@@ -28,12 +28,36 @@ state_t init_state()
   return state;
 }
 
+/*
+void trace(stack_t S, queue_t Q) {
+  print("Stack: ");
+  int[] arr = alloc_array(int, 100000);
+  int i = 0;
+  while (!stack_empty(S)) {
+    arr[i] = pop(S);
+    i++;
+  }
+  int max = i;
+  for (i = max-1; i >= 0; i--) {
+    printint(arr[i]); print(", ");
+  }
+  for (i = max-1; i >= 0; i--) {
+    push(S,arr[i]);
+  }
+  println("");
+  print("Queue: ");
+  while (!queue_empty(Q)) {
+    print(deq(Q)); print(", ");
+  }
+}
+*/
+
 /* Main clac interpreter. */
 /* Return true: clac top-level interpreter will expect more input */
 /* Return false: clac top-level interpreter will exit */
 bool eval(queue_t Q, stack_t S, state_t ST)
-// //@requires Q != NULL && S != NULL && ST != NULL;
-// //@ensures \result == false || queue_empty(Q);
+////@requires Q != NULL && S != NULL && ST != NULL;
+////@ensures \result == false || queue_empty(Q);
 {
   while (!queue_empty(Q)) {
     string tok = "";
@@ -50,11 +74,11 @@ bool eval(queue_t Q, stack_t S, state_t ST)
       int x = pop(S); /* This line is unsafe and must be fixed! */
       printint(x); print("\n");
     }
-    
+
     else if (string_equal(tok, "quit")) {
       return false;
     }
-    
+
     else if (string_equal(tok, "+")) {
       if (stack_empty(S))
         error("not enough elements on stack");
@@ -66,7 +90,7 @@ bool eval(queue_t Q, stack_t S, state_t ST)
       push(S, out);
       printint(out); print("\n");
     }
-    
+
     else if (string_equal(tok, "-")) {
       if (stack_empty(S))
         error("not enough elements on stack");
@@ -78,7 +102,7 @@ bool eval(queue_t Q, stack_t S, state_t ST)
       push(S, out);
       printint(out); print("\n");
     }
-    
+
     else if (string_equal(tok, "*")) {
       if (stack_empty(S))
         error("not enough elements on stack");
@@ -90,7 +114,7 @@ bool eval(queue_t Q, stack_t S, state_t ST)
       push(S, out);
       printint(out); print("\n");
     }
-    
+
     else if (string_equal(tok, "**")) {
       if (stack_empty(S))
         error("not enough elements on stack");
@@ -106,7 +130,7 @@ bool eval(queue_t Q, stack_t S, state_t ST)
       push(S, out);
       printint(out); print("\n");
     }
-    
+
     else if (string_equal(tok, "/")) {
       if (stack_empty(S))
         error("not enough elements on stack");
@@ -122,7 +146,7 @@ bool eval(queue_t Q, stack_t S, state_t ST)
       push(S, out);
       printint(out); print("\n");
     }
-    
+
     else if (string_equal(tok, "%")) {
       if (stack_empty(S))
         error("not enough elements on stack");
@@ -138,7 +162,7 @@ bool eval(queue_t Q, stack_t S, state_t ST)
       push(S, out);
       printint(out); print("\n");
     }
-    
+
     else if (string_equal(tok, "<")) {
       if (stack_empty(S))
         error("not enough elements on stack");
@@ -154,14 +178,14 @@ bool eval(queue_t Q, stack_t S, state_t ST)
       push(S, out);
       printint(out); print("\n");
     }
-    
+
     else if (string_equal(tok, "drop")) {
       if (stack_empty(S))
         error("not enough elements on stack");
       int out = pop(S);
       printint(out); print("\n");
     }
-    
+
     else if (string_equal(tok, "swap")) {
       if (stack_empty(S))
         error("not enough elements on stack");
@@ -173,7 +197,7 @@ bool eval(queue_t Q, stack_t S, state_t ST)
       push(S, x);
       printint(x); print("\n");
     }
-    
+
     else if (string_equal(tok, "rot")) {
       if (stack_empty(S))
         error("not enough elements on stack");
@@ -189,7 +213,7 @@ bool eval(queue_t Q, stack_t S, state_t ST)
       push(S, x);
       printint(x); print("\n");
     }
-    
+
     else if (string_equal(tok, "if")) {
       if (stack_empty(S))
         error("not enough elements on stack");
@@ -202,7 +226,7 @@ bool eval(queue_t Q, stack_t S, state_t ST)
           deq(Q);
         }
     }
-    
+
     else if (string_equal(tok, "pick")) {
       if (stack_empty(S))
         error("not enough elements on stack");
@@ -221,7 +245,7 @@ bool eval(queue_t Q, stack_t S, state_t ST)
       push(S, arr[n-1]);
       printint(arr[n-1]); print("\n");
     }
-    
+
     else if (string_equal(tok, "skip")) {
       if (queue_empty(Q))
         error("not enough elements on queue");
@@ -235,7 +259,7 @@ bool eval(queue_t Q, stack_t S, state_t ST)
           deq(Q);
         }
     }
-    
+
     else if (string_equal(tok, ":")) {
       if (queue_empty(Q))
         error("unexpected end of input");
@@ -252,25 +276,28 @@ bool eval(queue_t Q, stack_t S, state_t ST)
       }
       dict_insert(ST->dict, key, def);
     }
-    
+
     else if (dict_lookup(ST->dict, tok) != NULL) {
-      qpush(ST->qstack, dict_lookup(ST->dict, tok));
+      qpush(ST->qstack, Q);
       Q = queue_read_only_copy(dict_lookup(ST->dict, tok));
     }
-    
+
     else {
       /* Not defined as an operation name, should be an int */
       int* p = parse_int(tok, 10);
       if (p == NULL) { /* not an int */
-        /* call error(msg) which 
+        /* call error(msg) which
         prints msg and aborts */
         error(string_join("undefined token ", tok));
       }
       push(S, *p);
     }
+
+    if (queue_empty(Q) && !qstack_empty(ST->qstack)){
+      Q = qpop(ST->qstack);
+    }
   }
-  if (!qstack_empty(ST->qstack))
-    Q = qpop(ST->qstack);
+
   /* When you return "true", don't pop anything off the stack! When we
    * grade your function, we'll check that the stack contains the
    * integers we expect. */

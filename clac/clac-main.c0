@@ -29,6 +29,7 @@ void print_top(stack_t S)
   print(stack_empty(S) ? "" : "..,"); 
   printint(next); print(","); printint(top); println("]");
   push(S, next); push(S, top);
+
   return;
 }
 
