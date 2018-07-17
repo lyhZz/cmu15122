@@ -15,42 +15,43 @@
  * implementation of the state_t type. You will add new fields to this
  * struct when you do task 4. */
 struct state_header {
-  dict_t dict;
-  qstack_t qstack;
+	dict_t dict;
+	qstack_t qstack;
 };
 typedef struct state_header* state_t;
 state_t init_state()
 //@ensures \result != NULL;
 {
-  state_t state = alloc(struct state_header);
-  state->dict = dict_new();
-  state->qstack = qstack_new();
-  return state;
+	state_t state = alloc(struct state_header);
+	state->dict = dict_new();
+	state->qstack = qstack_new();
+	return state;
 }
-
+/*
 void trace(stack_t S, queue_t Q) {
-  print("STACK: ");
-  int[] arr = alloc_array(int, 100000);
-  int i = 0;
-  queue_t A = queue_read_only_copy(Q);
-  while (!stack_empty(S)) {
-    arr[i] = pop(S);
-    i++;
-  }
-  int max = i;
-  for (i = max-1; i >= 0; i--) {
-    printint(arr[i]); print(" ");
-  }
-  for (i = max-1; i >= 0; i--) {
-    push(S,arr[i]);
-  }
-  println("");
-  print("QUEUE: ");
-  while (!queue_empty(A)) {
-    print(deq(A)); print(" ");
-  }
-  println("\n");
+	print("STACK: ");
+	int[] arr = alloc_array(int, 100000);
+	int i = 0;
+	queue_t A = queue_read_only_copy(Q);
+	while (!stack_empty(S)) {
+		arr[i] = pop(S);
+		i++;
+	}
+	int max = i;
+	for (i = max-1; i >= 0; i--) {
+		printint(arr[i]); print(" ");
+	}
+	for (i = max-1; i >= 0; i--) {
+		push(S,arr[i]);
+	}
+	println("");
+	print("QUEUE: ");
+	while (!queue_empty(A)) {
+		print(deq(A)); print(" ");
+	}
+	print("\n\n");
 }
+*/
 
 /* Main clac interpreter. */
 /* Return true: clac top-level interpreter will expect more input */
@@ -59,257 +60,257 @@ bool eval(queue_t Q, stack_t S, state_t ST)
 //@requires Q != NULL && S != NULL && ST != NULL;
 //@ensures \result == false || queue_empty(Q);
 {
-  queue_t A = Q;
-  while (!queue_empty(A)) {
-  
-    trace(S, A);
-    
-    string tok = "";
-    if (A != NULL)
-      tok = deq(A); /* Is this dequeue safe? */
-    else
-      return true;
+	queue_t A = Q;
+	while (!queue_empty(A)) {
 
-    // Uncommenting these lines might help with debugging:
-    // print("Read: "); print(tok); print("\n");
-    if (string_equal(tok, "print")) {
-      if (stack_empty(S))
-        error("not enough elements on stack");
-      int x = pop(S); /* This line is unsafe and must be fixed! */
-      printint(x); print("\n");
-    }
+		//trace(S, A);
 
-    else if (string_equal(tok, "quit")) {
-      return false;
-    }
+		string tok = "";
+		if (A != NULL)
+			tok = deq(A); /* Is this dequeue safe? */
+		else
+			return true;
 
-    else if (string_equal(tok, "+")) {
-      if (stack_empty(S))
-        error("not enough elements on stack");
-      int added1 = pop(S);
-      if (stack_empty(S))
-        error("not enough elements on stack");
-      int added2 = pop(S);
-      if (int_max() - added2 < added1)
-        error("overflow");
-      int out = added1 + added2;
-      push(S, out);
-      //printint(out); print("\n");
-    }
+		// Uncommenting these lines might help with debugging:
+		// print("Read: "); print(tok); print("\n");
+		if (string_equal(tok, "print")) {
+			if (stack_empty(S))
+				error("not enough elements on stack");
+			int x = pop(S); /* This line is unsafe and must be fixed! */
+			printint(x); print("\n");
+		}
 
-    else if (string_equal(tok, "-")) {
-      if (stack_empty(S))
-        error("not enough elements on stack");
-      int subtracted = pop(S);
-      if (stack_empty(S))
-        error("not enough elements on stack");
-      int ttl = pop(S);
-      int out = ttl - subtracted;
-      push(S, out);
-      //printint(out); print("\n");
-    }
+		else if (string_equal(tok, "quit")) {
+			return false;
+		}
 
-    else if (string_equal(tok, "*")) {
-      if (stack_empty(S))
-        error("not enough elements on stack");
-      int mult1 = pop(S);
-      if (stack_empty(S))
-        error("not enough elements on stack");
-      int mult2 = pop(S);
-      if (int_max() / mult2 < mult1)
-        error("overflow");
-      int out = mult1 * mult2;
-      push(S, out);
-      //printint(out); print("\n");
-    }
+		else if (string_equal(tok, "+")) {
+			if (stack_empty(S))
+				error("not enough elements on stack");
+			int added1 = pop(S);
+			if (stack_empty(S))
+				error("not enough elements on stack");
+			int added2 = pop(S);
+			if (int_max() - added2 < added1)
+				error("overflow");
+			int out = added1 + added2;
+			push(S, out);
+			//printint(out); print("\n");
+		}
 
-    else if (string_equal(tok, "**")) {
-      if (stack_empty(S))
-        error("not enough elements on stack");
-      int power = pop(S);
-      if (power < 0)
-        error("power cannot be less than zero!");
-      if (stack_empty(S))
-        error("not enough elements on stack");
-      int base = pop(S);
-      int out = 1;
-      for (int i = 0; i < power; i++) {
-        if (int_max() / base < out)
-          error("overflow");
-        out *= base;
-      }
-      push(S, out);
-      //printint(out); print("\n");
-    }
+		else if (string_equal(tok, "-")) {
+			if (stack_empty(S))
+				error("not enough elements on stack");
+			int subtracted = pop(S);
+			if (stack_empty(S))
+				error("not enough elements on stack");
+			int ttl = pop(S);
+			int out = ttl - subtracted;
+			push(S, out);
+			//printint(out); print("\n");
+		}
 
-    else if (string_equal(tok, "/")) {
-      if (stack_empty(S))
-        error("not enough elements on stack");
-      int divident = pop(S);
-      if (divident == 0)
-        error("division by zero");
-      if (stack_empty(S))
-        error("not enough elements on stack");
-      int divided = pop(S);
-      if (divided == int_min() && divident == -1)
-        error("int_min() divided by -1");
-      int out = divided / divident;
-      push(S, out);
-      //printint(out); print("\n");
-    }
+		else if (string_equal(tok, "*")) {
+			if (stack_empty(S))
+				error("not enough elements on stack");
+			int mult1 = pop(S);
+			if (stack_empty(S))
+				error("not enough elements on stack");
+			int mult2 = pop(S);
+			if (int_max() / mult2 < mult1)
+				error("overflow");
+			int out = mult1 * mult2;
+			push(S, out);
+			//printint(out); print("\n");
+		}
 
-    else if (string_equal(tok, "%")) {
-      if (stack_empty(S))
-        error("not enough elements on stack");
-      int divident = pop(S);
-      if (divident == 0)
-          error("division by zero");
-      if (stack_empty(S))
-        error("not enough elements on stack");
-      int divided = pop(S);
-      if (divided == int_min() && divident == -1)
-        error("int_min() divided by -1");
-      int out = divided % divident;
-      push(S, out);
-      //printint(out); print("\n");
-    }
+		else if (string_equal(tok, "**")) {
+			if (stack_empty(S))
+				error("not enough elements on stack");
+			int power = pop(S);
+			if (power < 0)
+				error("power cannot be less than zero!");
+			if (stack_empty(S))
+				error("not enough elements on stack");
+			int base = pop(S);
+			int out = 1;
+			for (int i = 0; i < power; i++) {
+				if (int_max() / base < out)
+					error("overflow");
+				out *= base;
+			}
+			push(S, out);
+			//printint(out); print("\n");
+		}
 
-    else if (string_equal(tok, "<")) {
-      if (stack_empty(S))
-        error("not enough elements on stack");
-      int y = pop(S);
-      if (stack_empty(S))
-        error("not enough elements on stack");
-      int x = pop(S);
-      int out = 0;
-      if (x < y)
-        out = 1;
-      else
-        out = 0;
-      push(S, out);
-      //printint(out); print("\n");
-    }
+		else if (string_equal(tok, "/")) {
+			if (stack_empty(S))
+				error("not enough elements on stack");
+			int divident = pop(S);
+			if (divident == 0)
+				error("division by zero");
+			if (stack_empty(S))
+				error("not enough elements on stack");
+			int divided = pop(S);
+			if (divided == int_min() && divident == -1)
+				error("int_min() divided by -1");
+			int out = divided / divident;
+			push(S, out);
+			//printint(out); print("\n");
+		}
 
-    else if (string_equal(tok, "drop")) {
-      if (stack_empty(S))
-        error("not enough elements on stack");
-      int out = pop(S);
-      //printint(out); print("\n");
-    }
+		else if (string_equal(tok, "%")) {
+			if (stack_empty(S))
+				error("not enough elements on stack");
+			int divident = pop(S);
+			if (divident == 0)
+					error("division by zero");
+			if (stack_empty(S))
+				error("not enough elements on stack");
+			int divided = pop(S);
+			if (divided == int_min() && divident == -1)
+				error("int_min() divided by -1");
+			int out = divided % divident;
+			push(S, out);
+			//printint(out); print("\n");
+		}
 
-    else if (string_equal(tok, "swap")) {
-      if (stack_empty(S))
-        error("not enough elements on stack");
-      int y = pop(S);
-      if (stack_empty(S))
-        error("not enough elements on stack");
-      int x = pop(S);
-      push(S, y);
-      push(S, x);
-      //printint(x); print("\n");
-    }
+		else if (string_equal(tok, "<")) {
+			if (stack_empty(S))
+				error("not enough elements on stack");
+			int y = pop(S);
+			if (stack_empty(S))
+				error("not enough elements on stack");
+			int x = pop(S);
+			int out = 0;
+			if (x < y)
+				out = 1;
+			else
+				out = 0;
+			push(S, out);
+			//printint(out); print("\n");
+		}
 
-    else if (string_equal(tok, "rot")) {
-      if (stack_empty(S))
-        error("not enough elements on stack");
-      int z = pop(S);
-      if (stack_empty(S))
-        error("not enough elements on stack");
-      int y = pop(S);
-      if (stack_empty(S))
-        error("not enough elements on stack");
-      int x = pop(S);
-      push(S, y);
-      push(S, z);
-      push(S, x);
-      //printint(x); print("\n");
-    }
+		else if (string_equal(tok, "drop")) {
+			if (stack_empty(S))
+				error("not enough elements on stack");
+			int out = pop(S);
+			//printint(out); print("\n");
+		}
 
-    else if (string_equal(tok, "if")) {
-      if (stack_empty(S))
-        error("not enough elements on stack");
-      int x = pop(S);
-      if (x != 0) {}
-      else
-        for (int i = 0; i < 3; i++) {
-          if (A == NULL || queue_empty(A))
-            error("unexpected end of input");
-          deq(A);
-        }
-    }
+		else if (string_equal(tok, "swap")) {
+			if (stack_empty(S))
+				error("not enough elements on stack");
+			int y = pop(S);
+			if (stack_empty(S))
+				error("not enough elements on stack");
+			int x = pop(S);
+			push(S, y);
+			push(S, x);
+			//printint(x); print("\n");
+		}
 
-    else if (string_equal(tok, "pick")) {
-      if (stack_empty(S))
-        error("not enough elements on stack");
-      int n = pop(S);
-      if (n < 0)
-        error("pick must be positive");
-      int[] arr = alloc_array(int, n);
-      for (int i = 0; i < n; i++) {
-        if (!stack_empty(S))
-          arr[i] = pop(S);
-        else
-          error("not enough elements on stack");
-      }
-      for (int i = n-1; i >= 0; i--)
-        push(S, arr[i]);
-      push(S, arr[n-1]);
-      //printint(arr[n-1]); print("\n");
-    }
+		else if (string_equal(tok, "rot")) {
+			if (stack_empty(S))
+				error("not enough elements on stack");
+			int z = pop(S);
+			if (stack_empty(S))
+				error("not enough elements on stack");
+			int y = pop(S);
+			if (stack_empty(S))
+				error("not enough elements on stack");
+			int x = pop(S);
+			push(S, y);
+			push(S, z);
+			push(S, x);
+			//printint(x); print("\n");
+		}
 
-    else if (string_equal(tok, "skip")) {
-      if (queue_empty(A))
-        error("not enough elements on queue");
-      int n = pop(S);
-      if (n < 0)
-        error("skip must be nonnegative");
-      else
-        for (int i = 0; i < n; i++) {
-          if (A == NULL || queue_empty(A))
-            error("unexpected end of input");
-          deq(A);
-        }
-    }
+		else if (string_equal(tok, "if")) {
+			if (stack_empty(S))
+				error("not enough elements on stack");
+			int x = pop(S);
+			if (x != 0) {}
+			else
+				for (int i = 0; i < 3; i++) {
+					if (A == NULL || queue_empty(A))
+						error("unexpected end of input");
+					deq(A);
+				}
+		}
 
-    else if (string_equal(tok, ":")) {
-      if (queue_empty(A))
-        error("unexpected end of input");
-      string key = deq(A);
-      if (queue_empty(A))
-        error("unexpected end of input");
-      queue_t def = queue_new();
-      string next = deq(A);
-      while (string_compare(next, ";") != 0) {
-        enq(def, next);
-        if (queue_empty(A))
-          error("unexpected end of input");
-        next = deq(A);
-      }
-      dict_insert(ST->dict, key, def);
-    }
+		else if (string_equal(tok, "pick")) {
+			if (stack_empty(S))
+				error("not enough elements on stack");
+			int n = pop(S);
+			if (n < 0)
+				error("pick must be positive");
+			int[] arr = alloc_array(int, n);
+			for (int i = 0; i < n; i++) {
+				if (!stack_empty(S))
+					arr[i] = pop(S);
+				else
+					error("not enough elements on stack");
+			}
+			for (int i = n-1; i >= 0; i--)
+				push(S, arr[i]);
+			push(S, arr[n-1]);
+			//printint(arr[n-1]); print("\n");
+		}
 
-    else if (dict_lookup(ST->dict, tok) != NULL) {
-      qpush(ST->qstack, A);
-      A = queue_read_only_copy(dict_lookup(ST->dict, tok));
-    }
+		else if (string_equal(tok, "skip")) {
+			if (queue_empty(A))
+				error("not enough elements on queue");
+			int n = pop(S);
+			if (n < 0)
+				error("skip must be nonnegative");
+			else
+				for (int i = 0; i < n; i++) {
+					if (A == NULL || queue_empty(A))
+						error("unexpected end of input");
+					deq(A);
+				}
+		}
 
-    else {
-      /* Not defined as an operation name, should be an int */
-      int* p = parse_int(tok, 10);
-      if (p == NULL) { /* not an int */
-        /* call error(msg) which
-        prints msg and aborts */
-        error(string_join("undefined token ", tok));
-      }
-      push(S, *p);
-    }
+		else if (string_equal(tok, ":")) {
+			if (queue_empty(A))
+				error("unexpected end of input");
+			string key = deq(A);
+			if (queue_empty(A))
+				error("unexpected end of input");
+			queue_t def = queue_new();
+			string next = deq(A);
+			while (string_compare(next, ";") != 0) {
+				enq(def, next);
+				if (queue_empty(A))
+					error("unexpected end of input");
+				next = deq(A);
+			}
+			dict_insert(ST->dict, key, def);
+		}
 
-    if (queue_empty(A) && !qstack_empty(ST->qstack)){
-      A = qpop(ST->qstack);
-    }
-  }
-  /* When you return "true", don't pop anything off the stack! When we
-   * grade your function, we'll check that the stack contains the
-   * integers we expect. */
-  return true;
+		else if (dict_lookup(ST->dict, tok) != NULL) {
+			qpush(ST->qstack, A);
+			A = queue_read_only_copy(dict_lookup(ST->dict, tok));
+		}
+
+		else {
+			/* Not defined as an operation name, should be an int */
+			int* p = parse_int(tok, 10);
+			if (p == NULL) { /* not an int */
+				/* call error(msg) which
+				prints msg and aborts */
+				error(string_join("undefined token ", tok));
+			}
+			push(S, *p);
+		}
+
+		if (queue_empty(A) && !qstack_empty(ST->qstack)){
+			A = qpop(ST->qstack);
+		}
+	}
+	/* When you return "true", don't pop anything off the stack! When we
+	 * grade your function, we'll check that the stack contains the
+	 * integers we expect. */
+	return true;
 }

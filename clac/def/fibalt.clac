@@ -1,6 +1,3 @@
-: comment fib : S, n => S, fib(n) ;
-: comment this uses if in a less obvious way to the same effect... ;
-: comment ... as the fib function in the writeup and fib.clac ;
 : noop ;
 : dup 1 pick ; 
 : fib dup if noop noop fib1 ;
