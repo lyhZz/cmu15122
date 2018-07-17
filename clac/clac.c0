@@ -91,11 +91,8 @@ bool eval(queue_t Q, stack_t S, state_t ST)
 			if (stack_empty(S))
 				error("not enough elements on stack");
 			int added2 = pop(S);
-			if (int_max() - added2 < added1)
-				error("overflow");
 			int out = added1 + added2;
 			push(S, out);
-			//printint(out); print("\n");
 		}
 
 		else if (string_equal(tok, "-")) {
@@ -107,7 +104,6 @@ bool eval(queue_t Q, stack_t S, state_t ST)
 			int ttl = pop(S);
 			int out = ttl - subtracted;
 			push(S, out);
-			//printint(out); print("\n");
 		}
 
 		else if (string_equal(tok, "*")) {
@@ -117,11 +113,8 @@ bool eval(queue_t Q, stack_t S, state_t ST)
 			if (stack_empty(S))
 				error("not enough elements on stack");
 			int mult2 = pop(S);
-			if (int_max() / mult2 < mult1)
-				error("overflow");
 			int out = mult1 * mult2;
 			push(S, out);
-			//printint(out); print("\n");
 		}
 
 		else if (string_equal(tok, "**")) {
@@ -135,12 +128,9 @@ bool eval(queue_t Q, stack_t S, state_t ST)
 			int base = pop(S);
 			int out = 1;
 			for (int i = 0; i < power; i++) {
-				if (int_max() / base < out)
-					error("overflow");
 				out *= base;
 			}
 			push(S, out);
-			//printint(out); print("\n");
 		}
 
 		else if (string_equal(tok, "/")) {
@@ -156,7 +146,6 @@ bool eval(queue_t Q, stack_t S, state_t ST)
 				error("int_min() divided by -1");
 			int out = divided / divident;
 			push(S, out);
-			//printint(out); print("\n");
 		}
 
 		else if (string_equal(tok, "%")) {
@@ -172,7 +161,6 @@ bool eval(queue_t Q, stack_t S, state_t ST)
 				error("int_min() divided by -1");
 			int out = divided % divident;
 			push(S, out);
-			//printint(out); print("\n");
 		}
 
 		else if (string_equal(tok, "<")) {
@@ -182,20 +170,18 @@ bool eval(queue_t Q, stack_t S, state_t ST)
 			if (stack_empty(S))
 				error("not enough elements on stack");
 			int x = pop(S);
-			int out = 0;
+			int out;
 			if (x < y)
 				out = 1;
 			else
 				out = 0;
 			push(S, out);
-			//printint(out); print("\n");
 		}
 
 		else if (string_equal(tok, "drop")) {
 			if (stack_empty(S))
 				error("not enough elements on stack");
 			int out = pop(S);
-			//printint(out); print("\n");
 		}
 
 		else if (string_equal(tok, "swap")) {
@@ -207,7 +193,6 @@ bool eval(queue_t Q, stack_t S, state_t ST)
 			int x = pop(S);
 			push(S, y);
 			push(S, x);
-			//printint(x); print("\n");
 		}
 
 		else if (string_equal(tok, "rot")) {
@@ -223,7 +208,6 @@ bool eval(queue_t Q, stack_t S, state_t ST)
 			push(S, y);
 			push(S, z);
 			push(S, x);
-			//printint(x); print("\n");
 		}
 
 		else if (string_equal(tok, "if")) {
@@ -255,7 +239,6 @@ bool eval(queue_t Q, stack_t S, state_t ST)
 			for (int i = n-1; i >= 0; i--)
 				push(S, arr[i]);
 			push(S, arr[n-1]);
-			//printint(arr[n-1]); print("\n");
 		}
 
 		else if (string_equal(tok, "skip")) {
