@@ -1,4 +1,3 @@
-: comment sum S, x1, x2, ... xn, n => S, (x1+x2+...+xn) ;
 : dup 1 pick ;
 : sum 0 swap sum_ret? ;
 : sum_ret? dup if sum_body 1 skip drop ;

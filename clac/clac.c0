@@ -28,6 +28,7 @@ state_t init_state()
 	return state;
 }
 
+/*
 void trace(stack_t S, queue_t Q) {
 	print("STACK: ");
 	int[] arr = alloc_array(int, 100000);
@@ -51,7 +52,7 @@ void trace(stack_t S, queue_t Q) {
 	}
 	print("\n\n");
 }
-
+*/
 
 /* Main clac interpreter. */
 /* Return true: clac top-level interpreter will expect more input */
@@ -63,7 +64,7 @@ bool eval(queue_t Q, stack_t S, state_t ST)
 	queue_t A = Q;
 	while (!queue_empty(A)) {
 
-		trace(S, A);
+		//trace(S, A);
 
 		string tok = "";
 		if (A != NULL)
