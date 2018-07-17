@@ -27,7 +27,7 @@ state_t init_state()
 	state->qstack = qstack_new();
 	return state;
 }
-/*
+
 void trace(stack_t S, queue_t Q) {
 	print("STACK: ");
 	int[] arr = alloc_array(int, 100000);
@@ -51,7 +51,7 @@ void trace(stack_t S, queue_t Q) {
 	}
 	print("\n\n");
 }
-*/
+
 
 /* Main clac interpreter. */
 /* Return true: clac top-level interpreter will expect more input */
@@ -63,7 +63,7 @@ bool eval(queue_t Q, stack_t S, state_t ST)
 	queue_t A = Q;
 	while (!queue_empty(A)) {
 
-		//trace(S, A);
+		trace(S, A);
 
 		string tok = "";
 		if (A != NULL)
@@ -227,13 +227,14 @@ bool eval(queue_t Q, stack_t S, state_t ST)
 			if (stack_empty(S))
 				error("not enough elements on stack");
 			int n = pop(S);
-			if (n < 0)
+			if (n <= 0)
 				error("pick must be positive");
-			int[] arr = alloc_array(int, n);
+			int[] arr = alloc_array(int, n+1);
 			for (int i = 0; i < n; i++) {
 				if (!stack_empty(S))
-					error("not enough elements on stack");
-				arr[i] = pop(S);	
+					arr[i] = pop(S);
+				else
+ 					error("not enough elements on stack");	
 			}
 			for (int i = n-1; i >= 0; i--)
 				push(S, arr[i]);
@@ -272,7 +273,8 @@ bool eval(queue_t Q, stack_t S, state_t ST)
 		}
 
 		else if (dict_lookup(ST->dict, tok) != NULL) {
-			qpush(ST->qstack, A);
+			if (!queue_empty(Q))
+				qpush(ST->qstack, A);
 			A = queue_read_only_copy(dict_lookup(ST->dict, tok));
 		}
 

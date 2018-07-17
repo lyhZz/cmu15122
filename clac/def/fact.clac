@@ -1,8 +1,4 @@
-: comment fact : S, n => S, fact(n) ;
 : dup 1 pick ;
 : fact 1 swap fact_return? ;
 : fact_return? dup if fact_body 1 skip drop ;
 : fact_body dup rot * swap 1 - fact_return? ;
-
-: comment some unit tests, quit if not satisfied ;
-: comment just continue if satisfied ;
