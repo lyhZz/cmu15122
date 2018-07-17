@@ -29,7 +29,7 @@ state_t init_state()
 }
 
 /*
-void trace(stack_t S, queue_t Q) {
+void trace(stack_t S, queue_t A) {
   print("Stack: ");
   int[] arr = alloc_array(int, 100000);
   int i = 0;
@@ -45,9 +45,9 @@ void trace(stack_t S, queue_t Q) {
     push(S,arr[i]);
   }
   println("");
-  print("Queue: ");
-  while (!queue_empty(Q)) {
-    print(deq(Q)); print(", ");
+  print("Aueue: ");
+  while (!queue_empty(A)) {
+    print(deq(A)); print(", ");
   }
 }
 */
@@ -56,13 +56,14 @@ void trace(stack_t S, queue_t Q) {
 /* Return true: clac top-level interpreter will expect more input */
 /* Return false: clac top-level interpreter will exit */
 bool eval(queue_t Q, stack_t S, state_t ST)
-////@requires Q != NULL && S != NULL && ST != NULL;
-////@ensures \result == false || queue_empty(Q);
+//@requires Q != NULL && S != NULL && ST != NULL;
+//@ensures \result == false || queue_empty(Q);
 {
-  while (!queue_empty(Q)) {
+  queue_t A = Q;
+  while (!queue_empty(A)) {
     string tok = "";
-    if (Q != NULL)
-      tok = deq(Q); /* Is this dequeue safe? */
+    if (A != NULL)
+      tok = deq(A); /* Is this dequeue safe? */
     else
       return true;
 
@@ -221,9 +222,9 @@ bool eval(queue_t Q, stack_t S, state_t ST)
       if (x != 0) {}
       else
         for (int i = 0; i < 3; i++) {
-          if (Q == NULL || queue_empty(Q))
+          if (A == NULL || queue_empty(A))
             error("unexpected end of input");
-          deq(Q);
+          deq(A);
         }
     }
 
@@ -247,39 +248,39 @@ bool eval(queue_t Q, stack_t S, state_t ST)
     }
 
     else if (string_equal(tok, "skip")) {
-      if (queue_empty(Q))
+      if (queue_empty(A))
         error("not enough elements on queue");
       int n = pop(S);
       if (n < 0)
         error("skip must be nonnegative");
       else
         for (int i = 0; i < n; i++) {
-          if (Q == NULL || queue_empty(Q))
+          if (A == NULL || queue_empty(A))
             error("unexpected end of input");
-          deq(Q);
+          deq(A);
         }
     }
 
     else if (string_equal(tok, ":")) {
-      if (queue_empty(Q))
+      if (queue_empty(A))
         error("unexpected end of input");
-      string key = deq(Q);
-      if (queue_empty(Q))
+      string key = deq(A);
+      if (queue_empty(A))
         error("unexpected end of input");
       queue_t def = queue_new();
-      string next = deq(Q);
+      string next = deq(A);
       while (string_compare(next, ";") != 0) {
         enq(def, next);
-        if (queue_empty(Q))
+        if (queue_empty(A))
           error("unexpected end of input");
-        next = deq(Q);
+        next = deq(A);
       }
       dict_insert(ST->dict, key, def);
     }
 
     else if (dict_lookup(ST->dict, tok) != NULL) {
-      qpush(ST->qstack, Q);
-      Q = queue_read_only_copy(dict_lookup(ST->dict, tok));
+      qpush(ST->qstack, A);
+      A = queue_read_only_copy(dict_lookup(ST->dict, tok));
     }
 
     else {
@@ -293,8 +294,8 @@ bool eval(queue_t Q, stack_t S, state_t ST)
       push(S, *p);
     }
 
-    if (queue_empty(Q) && !qstack_empty(ST->qstack)){
-      Q = qpop(ST->qstack);
+    if (queue_empty(A) && !qstack_empty(ST->qstack)){
+      A = qpop(ST->qstack);
     }
   }
 
