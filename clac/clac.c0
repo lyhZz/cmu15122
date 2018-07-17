@@ -28,29 +28,29 @@ state_t init_state()
   return state;
 }
 
-/*
-void trace(stack_t S, queue_t A) {
-  print("Stack: ");
+void trace(stack_t S, queue_t Q) {
+  print("STACK: ");
   int[] arr = alloc_array(int, 100000);
   int i = 0;
+  queue_t A = queue_read_only_copy(Q);
   while (!stack_empty(S)) {
     arr[i] = pop(S);
     i++;
   }
   int max = i;
   for (i = max-1; i >= 0; i--) {
-    printint(arr[i]); print(", ");
+    printint(arr[i]); print(" ");
   }
   for (i = max-1; i >= 0; i--) {
     push(S,arr[i]);
   }
   println("");
-  print("Aueue: ");
+  print("QUEUE: ");
   while (!queue_empty(A)) {
-    print(deq(A)); print(", ");
+    print(deq(A)); print(" ");
   }
+  println("");
 }
-*/
 
 /* Main clac interpreter. */
 /* Return true: clac top-level interpreter will expect more input */
@@ -61,6 +61,9 @@ bool eval(queue_t Q, stack_t S, state_t ST)
 {
   queue_t A = Q;
   while (!queue_empty(A)) {
+  
+    trace(S, A);
+    
     string tok = "";
     if (A != NULL)
       tok = deq(A); /* Is this dequeue safe? */
@@ -91,7 +94,7 @@ bool eval(queue_t Q, stack_t S, state_t ST)
         error("overflow");
       int out = added1 + added2;
       push(S, out);
-      printint(out); print("\n");
+      //printint(out); print("\n");
     }
 
     else if (string_equal(tok, "-")) {
@@ -103,7 +106,7 @@ bool eval(queue_t Q, stack_t S, state_t ST)
       int ttl = pop(S);
       int out = ttl - subtracted;
       push(S, out);
-      printint(out); print("\n");
+      //printint(out); print("\n");
     }
 
     else if (string_equal(tok, "*")) {
@@ -117,7 +120,7 @@ bool eval(queue_t Q, stack_t S, state_t ST)
         error("overflow");
       int out = mult1 * mult2;
       push(S, out);
-      printint(out); print("\n");
+      //printint(out); print("\n");
     }
 
     else if (string_equal(tok, "**")) {
@@ -136,7 +139,7 @@ bool eval(queue_t Q, stack_t S, state_t ST)
         out *= base;
       }
       push(S, out);
-      printint(out); print("\n");
+      //printint(out); print("\n");
     }
 
     else if (string_equal(tok, "/")) {
@@ -152,7 +155,7 @@ bool eval(queue_t Q, stack_t S, state_t ST)
         error("int_min() divided by -1");
       int out = divided / divident;
       push(S, out);
-      printint(out); print("\n");
+      //printint(out); print("\n");
     }
 
     else if (string_equal(tok, "%")) {
@@ -168,7 +171,7 @@ bool eval(queue_t Q, stack_t S, state_t ST)
         error("int_min() divided by -1");
       int out = divided % divident;
       push(S, out);
-      printint(out); print("\n");
+      //printint(out); print("\n");
     }
 
     else if (string_equal(tok, "<")) {
@@ -184,14 +187,14 @@ bool eval(queue_t Q, stack_t S, state_t ST)
       else
         out = 0;
       push(S, out);
-      printint(out); print("\n");
+      //printint(out); print("\n");
     }
 
     else if (string_equal(tok, "drop")) {
       if (stack_empty(S))
         error("not enough elements on stack");
       int out = pop(S);
-      printint(out); print("\n");
+      //printint(out); print("\n");
     }
 
     else if (string_equal(tok, "swap")) {
@@ -203,7 +206,7 @@ bool eval(queue_t Q, stack_t S, state_t ST)
       int x = pop(S);
       push(S, y);
       push(S, x);
-      printint(x); print("\n");
+      //printint(x); print("\n");
     }
 
     else if (string_equal(tok, "rot")) {
@@ -219,7 +222,7 @@ bool eval(queue_t Q, stack_t S, state_t ST)
       push(S, y);
       push(S, z);
       push(S, x);
-      printint(x); print("\n");
+      //printint(x); print("\n");
     }
 
     else if (string_equal(tok, "if")) {
@@ -251,7 +254,7 @@ bool eval(queue_t Q, stack_t S, state_t ST)
       for (int i = n-1; i >= 0; i--)
         push(S, arr[i]);
       push(S, arr[n-1]);
-      printint(arr[n-1]); print("\n");
+      //printint(arr[n-1]); print("\n");
     }
 
     else if (string_equal(tok, "skip")) {
