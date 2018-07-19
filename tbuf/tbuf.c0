@@ -14,43 +14,53 @@ struct dll_node {
 
 typedef struct tbuf_header tbuf;
 struct tbuf_header {
-	dll* start; 	/* the fist node of the list (on the left)  */
-	dll* cursor;	/* the position where the cursor is displayed */
-	dll* end;	/* the last node of the list (on the right) */
+	dll* start;		// the fist node of the list (on the left)
+	dll* cursor;	// the position where the cursor is displayed
+	dll* end;		// the last node of the list (on the right)
 };
 
 bool is_tbuf(tbuf* B);
-bool tbuf_at_left(tbuf* B);		/* Returns true if the cursor is in leftmost position */
-bool tbuf_at_right(tbuf* B);	/* Returns true if the cursor is in rightmost position */
-tbuf* tbuf_new();				/* Creates a new, empty text buffer */
-void tbuf_forward(tbuf* B);		/* Moves the cursor forward (right) */
-void tbuf_backward(tbuf* B);	/* Moves the cursor backward (left) */
-void tbuf_insert(tbuf* B, char c);	/* Insert a character before cursor */
-char tbuf_delete(tbuf* B);		/* Remove character before cursor (and returns the deleted char) */
-int tbuf_row(tbuf* B);			/* Returns the row of the cursor */
-int tbuf_col(tbuf* B);			/* Returns the column of the cursor */
+bool tbuf_at_left(tbuf* B);		// Returns true if the cursor is in leftmost position
+bool tbuf_at_right(tbuf* B);	// Returns true if the cursor is in rightmost position
+tbuf* tbuf_new();				// Creates a new, empty text buffer
+void tbuf_forward(tbuf* B);		// Moves the cursor forward (right)
+void tbuf_backward(tbuf* B);	// Moves the cursor backward (left)
+void tbuf_insert(tbuf* B, char c);	// Insert a character before cursor
+char tbuf_delete(tbuf* B);		// Remove character before cursor (and returns the deleted char)
+int tbuf_row(tbuf* B);			// Returns the row of the cursor
+int tbuf_col(tbuf* B);			// Returns the column of the cursor
 
 /*** Implementation ***/
 
 bool is_dll_segment(dll* a, dll* b) {
-	if (a == NULL || b == NULL)
+	if (a == NULL || b == NULL)	// if a or b is NULL
 		return false;
 	if (a == b)
 		return true;
-	if (a->next != NULL)
-		dll* current = a->next;
+	dll* current = a->next;
+	if (current == NULL)
+		return false;
 	while (current != b && current->next != NULL) {
 		if (current != current->next->prev)
 			return false;
 		current = current->next;
 	}
-	if (current == b)
-		return true;
-	else
+	if (current != b)
 		return false;
+	else
+		return true;
 }
 
 bool is_tbuf(tbuf* B) {
-	if (B == NULL || !is_dll_segment(B->start, B->end))
+	if (B == NULL || B->cursor == NULL || !is_dll_segment(B->start, B->end))
 		return false;
+	dll* current = B->start;
+	if (current == NULL)
+		return false;
+	while (B->cursor != current && current->next != NULL)
+		current = current->next;
+	if (B->cursor != current)
+		return false;
+	else
+		return true;
 }
