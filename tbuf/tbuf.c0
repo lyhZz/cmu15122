@@ -4,7 +4,8 @@
  * 15-122 Principles of Imperative Computation */
 
 /*** Interface ***/
-
+#use <conio>
+#use <util>
 typedef struct dll_node dll;
 struct dll_node {
 	char data;
@@ -33,9 +34,9 @@ int tbuf_col(tbuf* B);			// Returns the column of the cursor
 /*** Implementation ***/
 
 bool is_dll_segment(dll* a, dll* b) {
-	if (a == NULL || b == NULL)	// if a or b is NULL
+	if (a == NULL || b == NULL)
 		return false;
-	if (a == b)	// check if its length is one
+	if (a == b)
 		return true;
 	return is_dll_segment(a->next, b) && is_dll_segment(a, b->prev);
 }
@@ -44,9 +45,7 @@ bool is_tbuf(tbuf* B) {
 	if (B == NULL || B->cursor == NULL || !is_dll_segment(B->start, B->end))
 		return false;
 	dll* current = B->start;
-	if (current == NULL)
-		return false;
-	while (B->cursor != current && current != B->end && current->next != NULL)
+	while (current != B->cursor && current != B->end && current->next != NULL)
 		current = current->next;
 	if (B->cursor != current)
 		return false;
@@ -71,13 +70,14 @@ bool tbuf_at_right(tbuf* B)
 }
 
 tbuf* tbuf_new()
-//@ensures is_tbuf(B);
+//@ensures is_tbuf(\result);
 {
 	tbuf* out = alloc(tbuf);
 	out->start = alloc(dll);
 	out->end = alloc(dll);
-	out->start->next = end;
-	out->end->prev = start;
+	out->start->next = out->end;
+	out->end->prev = out->start;
+	out->cursor = out->end;
 	return out;
 }
 
@@ -94,8 +94,6 @@ void tbuf_backward(tbuf* B)
 //@requires is_tbuf(B);
 {
 	if (!is_tbuf(B) || tbuf_at_left(B))
-		return;
-	if (tbuf_at_left(B))
 		return;
 	B->cursor = B->cursor->prev;
 	return;
@@ -124,4 +122,29 @@ void tbuf_insert(tbuf* B, char c)
 	new->next = B->cursor;
 	B->cursor->prev = new;
 	return;
+}
+
+int tbuf_row(tbuf* B)
+//@requires is_tbuf(B);
+{
+	dll* current = B->cursor;
+	int ctr = 1;
+	while (current->prev != B->start) {
+		if (current->data == '\n')
+			ctr++;
+		current = current->prev;
+	}
+	return ctr;
+}
+
+int tbuf_col(tbuf* B)
+//@requires is_tbuf(B);
+{
+	dll* current = B->cursor;
+	int ctr = 0;
+	while (current->prev != B->start && current->prev->data != '\n') {
+		current = current->prev;
+		ctr++;
+	}
+	return ctr;
 }
