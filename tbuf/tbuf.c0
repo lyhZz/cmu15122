@@ -39,7 +39,7 @@ bool is_dll_segment(dll* a, dll* b) {
 		return true;
 	if (a->next != NULL)
 		dll* current = a->next;
-	while (current != b && current->n != NULL) {
+	while (current != b && current->next != NULL) {
 		if (current != current->next->prev)
 			return false;
 		current = current->next;
@@ -51,5 +51,6 @@ bool is_dll_segment(dll* a, dll* b) {
 }
 
 bool is_tbuf(tbuf* B) {
-	return B != NULL && is_dll_segment(B->start, B->end);
+	if (B == NULL || !is_dll_segment(B->start, B->end))
+		return false;
 }
