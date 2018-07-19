@@ -57,7 +57,7 @@ bool is_tbuf(tbuf* B) {
 	dll* current = B->start;
 	if (current == NULL)
 		return false;
-	while (B->cursor != current && current->next != NULL)
+	while (B->cursor != current && current != B->end && current->next != NULL)
 		current = current->next;
 	if (B->cursor != current)
 		return false;
