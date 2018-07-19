@@ -35,10 +35,10 @@ int tbuf_col(tbuf* B);			// Returns the column of the cursor
 bool is_dll_segment(dll* a, dll* b) {
 	if (a == NULL || b == NULL)	// if a or b is NULL
 		return false;
-	if (a == b)
+	if (a == b)	// check if its length is one
 		return true;
 	dll* current = a->next;
-	if (current == NULL)
+	if (current == NULL)	// if current is NULL, don't dereference and return false
 		return false;
 	while (current != b && current->next != NULL) {
 		if (current != current->next->prev)
@@ -63,4 +63,43 @@ bool is_tbuf(tbuf* B) {
 		return false;
 	else
 		return true;
+}
+
+bool tbuf_at_left(tbuf* B) {
+	if (!is_tbuf(B))
+		return false;
+	return B->start->next == B->cursor;
+}
+
+bool tbuf_at_right(tbuf* B) {
+	if (!is_tbuf(B))
+		return false;
+	return B->end == B->cursor;
+}
+
+tbuf* tbuf_new() {
+	tbuf* out = alloc(tbuf);
+	out->start = alloc(dll);
+	out->end = alloc(dll);
+	out->start->next = end;
+	out->end->prev = start;
+	return out;
+}
+
+void tbuf_forward(tbuf* B) {
+	if (!is_tbuf(B))
+		return;
+	if (tbuf_at_right(B))
+		return;
+	B->cursor = B->cursor->next;
+	return;
+}
+
+void tbuf_backward(tbuf* B) {
+	if (!is_tbuf(B))
+		return;
+	if (tbuf_at_left(B))
+		return;
+	B->cursor = B->cursor->prev;
+	return;
 }
