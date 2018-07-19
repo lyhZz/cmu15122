@@ -37,18 +37,7 @@ bool is_dll_segment(dll* a, dll* b) {
 		return false;
 	if (a == b)	// check if its length is one
 		return true;
-	dll* current = a->next;
-	if (current == NULL)	// if current is NULL, don't dereference and return false
-		return false;
-	while (current != b && current->next != NULL) {
-		if (current != current->next->prev)
-			return false;
-		current = current->next;
-	}
-	if (current != b)
-		return false;
-	else
-		return true;
+	return is_dll_segment(a->next, b) && is_dll_segment(a, b->prev);
 }
 
 bool is_tbuf(tbuf* B) {
@@ -65,19 +54,25 @@ bool is_tbuf(tbuf* B) {
 		return true;
 }
 
-bool tbuf_at_left(tbuf* B) {
+bool tbuf_at_left(tbuf* B)
+//@requires is_tbuf(B);
+{
 	if (!is_tbuf(B))
 		return false;
 	return B->start->next == B->cursor;
 }
 
-bool tbuf_at_right(tbuf* B) {
+bool tbuf_at_right(tbuf* B)
+//@requires is_tbuf(B);
+{
 	if (!is_tbuf(B))
 		return false;
 	return B->end == B->cursor;
 }
 
-tbuf* tbuf_new() {
+tbuf* tbuf_new()
+//@ensures is_tbuf(B);
+{
 	tbuf* out = alloc(tbuf);
 	out->start = alloc(dll);
 	out->end = alloc(dll);
@@ -86,20 +81,47 @@ tbuf* tbuf_new() {
 	return out;
 }
 
-void tbuf_forward(tbuf* B) {
-	if (!is_tbuf(B))
-		return;
-	if (tbuf_at_right(B))
+void tbuf_forward(tbuf* B)
+//@requires is_tbuf(B);
+{
+	if (!is_tbuf(B) || tbuf_at_right(B))
 		return;
 	B->cursor = B->cursor->next;
 	return;
 }
 
-void tbuf_backward(tbuf* B) {
-	if (!is_tbuf(B))
+void tbuf_backward(tbuf* B)
+//@requires is_tbuf(B);
+{
+	if (!is_tbuf(B) || tbuf_at_left(B))
 		return;
 	if (tbuf_at_left(B))
 		return;
 	B->cursor = B->cursor->prev;
+	return;
+}
+
+char tbuf_delete(tbuf* B)
+//@requires is_tbuf(B);
+{
+	if (!is_tbuf(B) || tbuf_at_left(B))
+		return '\0';
+	dll* tmp = B->cursor->prev;
+	tmp->prev->next = B->cursor;
+	B->cursor->prev = tmp->prev;
+	return tmp->data;
+}
+
+void tbuf_insert(tbuf* B, char c)
+//@requires is_tbuf(B);
+{
+	if (!is_tbuf(B))
+		return;
+	dll* new = alloc(dll);
+	new->data = c;
+	B->cursor->prev->next = new;
+	new->prev = B->cursor->prev;
+	new->next = B->cursor;
+	B->cursor->prev = new;
 	return;
 }
