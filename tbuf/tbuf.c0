@@ -38,7 +38,7 @@ bool forward_connected(dll* a, dll* b) {
 		return false;
 	if (a == b)
 		return true;
-	return forward_connected(a->next, b);
+	return a->next->prev == a && forward_connected(a->next, b);
 }
 
 bool backward_connected(dll* a, dll* b) {
@@ -46,7 +46,7 @@ bool backward_connected(dll* a, dll* b) {
 		return false;
 	if (a == b)
 		return true;
-	return backward_connected(a, b->prev);
+	return b->prev->next == b && backward_connected(a, b->prev);
 }
 
 bool is_tbuf(tbuf* B) {
