@@ -42,7 +42,7 @@ bool is_dll_segment(dll* a, dll* b) {
 }
 
 bool is_tbuf(tbuf* B) {
-	if (B == NULL || B->cursor == NULL || !is_dll_segment(B->start, B->end))
+	if (B == NULL || B->cursor == NULL || B->start == B->end || !is_dll_segment(B->start, B->end))
 		return false;
 	dll* current = B->start;
 	while (current != B->cursor && current != B->end && current->next != NULL)
@@ -55,17 +55,15 @@ bool is_tbuf(tbuf* B) {
 
 bool tbuf_at_left(tbuf* B)
 //@requires is_tbuf(B);
+//@ensures is_tbuf(B);
 {
-	if (!is_tbuf(B))
-		return false;
 	return B->start->next == B->cursor;
 }
 
 bool tbuf_at_right(tbuf* B)
 //@requires is_tbuf(B);
+//@ensures is_tbuf(B);
 {
-	if (!is_tbuf(B))
-		return false;
 	return B->end == B->cursor;
 }
 
@@ -83,27 +81,27 @@ tbuf* tbuf_new()
 
 void tbuf_forward(tbuf* B)
 //@requires is_tbuf(B);
+//@requires !tbuf_at_right(B);
+//@ensures is_tbuf(B);
 {
-	if (!is_tbuf(B) || tbuf_at_right(B))
-		return;
 	B->cursor = B->cursor->next;
 	return;
 }
 
 void tbuf_backward(tbuf* B)
 //@requires is_tbuf(B);
+//@requires !tbuf_at_left(B);
+//@ensures is_tbuf(B);
 {
-	if (!is_tbuf(B) || tbuf_at_left(B))
-		return;
 	B->cursor = B->cursor->prev;
 	return;
 }
 
 char tbuf_delete(tbuf* B)
 //@requires is_tbuf(B);
+//@requires !tbuf_at_left(B);
+//@ensures is_tbuf(B);
 {
-	if (!is_tbuf(B) || tbuf_at_left(B))
-		return '\0';
 	dll* tmp = B->cursor->prev;
 	tmp->prev->next = B->cursor;
 	B->cursor->prev = tmp->prev;
@@ -112,9 +110,8 @@ char tbuf_delete(tbuf* B)
 
 void tbuf_insert(tbuf* B, char c)
 //@requires is_tbuf(B);
+//@ensures is_tbuf(B);
 {
-	if (!is_tbuf(B))
-		return;
 	dll* new = alloc(dll);
 	new->data = c;
 	B->cursor->prev->next = new;
@@ -126,10 +123,14 @@ void tbuf_insert(tbuf* B, char c)
 
 int tbuf_row(tbuf* B)
 //@requires is_tbuf(B);
+//@ensures is_tbuf(B);
+//@ensures \result > 0;
 {
 	dll* current = B->cursor;
 	int ctr = 1;
-	while (current->prev != B->start) {
+	if (current->data == '\n')
+		ctr--;
+	while (current != B->start) {
 		if (current->data == '\n')
 			ctr++;
 		current = current->prev;
@@ -139,6 +140,8 @@ int tbuf_row(tbuf* B)
 
 int tbuf_col(tbuf* B)
 //@requires is_tbuf(B);
+//@ensures is_tbuf(B);
+//@ensures \result >= 0;
 {
 	dll* current = B->cursor;
 	int ctr = 0;

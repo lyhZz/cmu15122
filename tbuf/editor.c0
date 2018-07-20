@@ -7,19 +7,100 @@
 
 typedef struct editor_header editor;
 struct editor_header {
-  tbuf* buffer;
-  int row;
-  int col;
+	tbuf* buffer;
+	int row;
+	int col;
 };
-
 bool is_editor(editor* E);
-
-editor* editor_new();                  /* Creates a new, empty text buffer */
-void editor_forward(editor* E);        /* Moves the cursor forward (right) */
-void editor_backward(editor* E);       /* Moves the cursor backward (left) */
-void editor_insert(editor* E, char c); /* Insert a character before cursor */
-void editor_delete(editor* E);         /* Remove character before cursor   */
-void editor_up(editor* E);             /* Moves the cursor up              */
-void editor_down(editor* E);           /* Moves the cursor down            */
+editor* editor_new();	/* Creates a new, empty text buffer */
+void editor_forward(editor* E);	/* Moves the cursor forward (right) */
+void editor_backward(editor* E);	/* Moves the cursor backward (left) */
+void editor_insert(editor* E, char c);	/* Insert a character before cursor */
+void editor_delete(editor* E);	/* Remove character before cursor */
+void editor_up(editor* E);	/* Moves the cursor up */
+void editor_down(editor* E);	/* Moves the cursor down */
 
 /*** Implementation ***/
+
+bool is_editor(editor* E)
+{
+	return E != NULL && is_tbuf(E->buffer) && E->row > 0 && E->row == tbuf_row(E->buffer) && E->col >= 0 && E->col == tbuf_col(E->buffer);
+}
+
+editor* editor_new()
+//ensures is_editor(\result);
+{
+	editor* new = alloc(editor);
+	new->row = 1;
+	new->col = 0;
+	new->buffer = tbuf_new();
+	return new;
+}
+
+void editor_forward(editor* E)
+//@requires is_editor(E);
+//@ensures is_editor(E);
+{
+	if (tbuf_at_right(E->buffer))
+		return;
+	if (E->buffer->cursor->data == '\n') {
+		E->row++;
+		E->col = 0;
+	}
+	else {
+		E->col++;
+	}
+	tbuf_forward(E->buffer);
+	return;
+}
+
+void editor_backward(editor* E)
+//@requires is_editor(E);
+//@ensures is_editor(E);
+{
+	if (tbuf_at_left(E->buffer))
+		return;
+	tbuf_backward(E->buffer);
+	if (E->buffer->cursor->data == '\n') {
+		if (E->row > 1)
+			E->row--;
+		E->col = tbuf_col(E->buffer);
+	}
+	else {
+		E->col--;
+	}
+	return;
+}
+
+void editor_insert(editor* E, char c)
+//@requires is_editor(E);
+//@ensures is_editor(E);
+{
+	tbuf_insert(E->buffer, c);
+	if (c == '\n') {
+		E->row++;
+		E->col = 0;
+	}
+	else {
+		E->col++;
+	}
+	return;
+}
+
+void editor_delete(editor* E)
+//@requires is_editor(E);
+//@ensures is_editor(E);
+{
+	if (tbuf_at_left(E->buffer))
+		return;
+	char c = tbuf_delete(E->buffer);
+	if (c == '\n') {
+		if (E->row > 1)
+			E->row--;
+		E->col = tbuf_col(E->buffer);
+	}
+	else {
+		E->col--;
+	}
+	return;
+}
