@@ -140,4 +140,3 @@ void editor_down(editor* E)
 			editor_forward(E);
 	}
 }
-
