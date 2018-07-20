@@ -33,16 +33,24 @@ int tbuf_col(tbuf* B);			// Returns the column of the cursor
 
 /*** Implementation ***/
 
-bool is_dll_segment(dll* a, dll* b) {
+bool forward_connected(dll* a, dll* b) {
 	if (a == NULL || b == NULL)
 		return false;
 	if (a == b)
 		return true;
-	return is_dll_segment(a->next, b) && is_dll_segment(a, b->prev);
+	return forward_connected(a->next, b);
+}
+
+bool backward_connected(dll* a, dll* b) {
+	if (a == NULL || b == NULL)
+		return false;
+	if (a == b)
+		return true;
+	return backward_connected(a, b->prev);
 }
 
 bool is_tbuf(tbuf* B) {
-	if (B == NULL || B->cursor == NULL || B->start == B->end || !is_dll_segment(B->start, B->end))
+	if (B == NULL || B->cursor == NULL || B->start == B->end || !forward_connected(B->start, B->end) || !backward_connected(B->start, B->end))
 		return false;
 	dll* current = B->start;
 	while (current != B->cursor && current != B->end && current->next != NULL)
@@ -85,7 +93,6 @@ void tbuf_forward(tbuf* B)
 //@ensures is_tbuf(B);
 {
 	B->cursor = B->cursor->next;
-	return;
 }
 
 void tbuf_backward(tbuf* B)
@@ -94,7 +101,6 @@ void tbuf_backward(tbuf* B)
 //@ensures is_tbuf(B);
 {
 	B->cursor = B->cursor->prev;
-	return;
 }
 
 char tbuf_delete(tbuf* B)
@@ -118,7 +124,6 @@ void tbuf_insert(tbuf* B, char c)
 	new->prev = B->cursor->prev;
 	new->next = B->cursor;
 	B->cursor->prev = new;
-	return;
 }
 
 int tbuf_row(tbuf* B)

@@ -17,8 +17,8 @@
 #use <string>
 
 // Missing functions from editor.c0
-void editor_up(editor* E) { }
-void editor_down(editor* E) { }
+//void editor_up(editor* E) {}
+//void editor_down(editor* E) {}
 
 void render_topbar(WINDOW* W) 
 //@requires W != NULL;

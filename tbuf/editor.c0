@@ -11,6 +11,7 @@ struct editor_header {
 	int row;
 	int col;
 };
+
 bool is_editor(editor* E);
 editor* editor_new();	/* Creates a new, empty text buffer */
 void editor_forward(editor* E);	/* Moves the cursor forward (right) */
@@ -51,7 +52,6 @@ void editor_forward(editor* E)
 		E->col++;
 	}
 	tbuf_forward(E->buffer);
-	return;
 }
 
 void editor_backward(editor* E)
@@ -69,7 +69,6 @@ void editor_backward(editor* E)
 	else {
 		E->col--;
 	}
-	return;
 }
 
 void editor_insert(editor* E, char c)
@@ -84,7 +83,6 @@ void editor_insert(editor* E, char c)
 	else {
 		E->col++;
 	}
-	return;
 }
 
 void editor_delete(editor* E)
@@ -102,5 +100,44 @@ void editor_delete(editor* E)
 	else {
 		E->col--;
 	}
-	return;
 }
+
+void editor_up(editor* E)
+//@requires is_editor(E);
+//@ensures is_editor(E);
+{
+	
+	if (tbuf_row(E->buffer) == 1)
+		return;
+
+	int current_col = tbuf_col(E->buffer);
+	editor_backward(E);
+	while (E->buffer->cursor->data != '\n')
+		editor_backward(E);
+	
+	int prev_line_length = tbuf_col(E->buffer);
+	if (current_col < prev_line_length)
+		for (int i = 0; i < prev_line_length - current_col; i++)
+			editor_backward(E);
+}
+
+void editor_down(editor* E)
+//@requires is_editor(E);
+//@ensures is_editor(E);
+{
+	int current_col = tbuf_col(E->buffer);
+	int ctr = 0;
+	while (E->buffer->cursor->data != '\n' && !tbuf_at_right(E->buffer)) {
+		editor_forward(E);
+		ctr++;
+	}
+	if (tbuf_at_right(E->buffer))
+		for (int i = 0; i < ctr; i++)
+			editor_backward(E);
+	else {
+		editor_forward(E);
+		for (int i = 0; i < current_col && E->buffer->cursor->data != '\n'; i++)
+			editor_forward(E);
+	}
+}
+
