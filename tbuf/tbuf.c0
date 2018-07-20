@@ -52,7 +52,7 @@ bool backward_connected(dll* a, dll* b) {
 bool is_tbuf(tbuf* B) {
 	if (B == NULL || B->cursor == NULL || B->start == B->end || !forward_connected(B->start, B->end) || !backward_connected(B->start, B->end))
 		return false;
-	dll* current = B->start;
+	dll* current = B->start->next;
 	while (current != B->cursor && current != B->end && current->next != NULL)
 		current = current->next;
 	if (B->cursor != current)
