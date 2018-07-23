@@ -1,0 +1,44 @@
+#use <conio>
+#use <util>
+int main() {
+	bloom_t bloom0 = bloom_new(10);
+	bloom_add(bloom0, "JX2WmEZBxyvdD7Pma7b7Eep0sxWxi");
+	bloom_add(bloom0, "NmcKuHR5xz9A4tgzl+2K+ABPh6H8");
+	bloom_add(bloom0, "zMGJShpGoMUUWudGwe");
+	bloom_add(bloom0, "j3QH+MXYBXn2L5rivgVITL");
+	bloom_add(bloom0, "7x/1ErQI08pNFSxchRn5WyymEW");
+	bloom_add(bloom0, "yI0aL15S1dT9T16DCqxN");
+	bloom_add(bloom0, "HsgxRh5ZLG5y/AkkwxXY9ZnDcg8");
+	bloom_add(bloom0, "2ngBvB+VMVj5gVQwWo6E6sHSmZAYRS9Mg9TiWiE3");
+	bloom_add(bloom0, "IrVzVlOOuP6pxfHW9I7PzHB+lT8Oo8P1AH");
+	bloom_add(bloom0, "MSXhHrGZM25O0jRvVg1MGrwys");
+	bloom_add(bloom0, "O+PDlSdY7ixyxIqwofXDJ/VxKwFdNGQYW5Wk4WFAw");
+	bloom_add(bloom0, "rAFlMvBzpkT6Yi+qWrii+81g4AZzH61D9LAo5tPB");
+	bloom_add(bloom0, "BKNmXwCpy2l41ZzYHN9GQxcMJS01jTybfcm");
+	assert(bloom_contains(bloom0, "JX2WmEZBxyvdD7Pma7b7Eep0sxWxi"));
+	assert(bloom_contains(bloom0, "NmcKuHR5xz9A4tgzl+2K+ABPh6H8"));
+	assert(bloom_contains(bloom0, "zMGJShpGoMUUWudGwe"));
+	assert(bloom_contains(bloom0, "j3QH+MXYBXn2L5rivgVITL"));
+	assert(bloom_contains(bloom0, "7x/1ErQI08pNFSxchRn5WyymEW"));
+	assert(bloom_contains(bloom0, "yI0aL15S1dT9T16DCqxN"));
+	assert(bloom_contains(bloom0, "HsgxRh5ZLG5y/AkkwxXY9ZnDcg8"));
+	assert(bloom_contains(bloom0, "2ngBvB+VMVj5gVQwWo6E6sHSmZAYRS9Mg9TiWiE3"));
+	assert(bloom_contains(bloom0, "IrVzVlOOuP6pxfHW9I7PzHB+lT8Oo8P1AH"));
+	assert(bloom_contains(bloom0, "MSXhHrGZM25O0jRvVg1MGrwys"));
+	assert(bloom_contains(bloom0, "O+PDlSdY7ixyxIqwofXDJ/VxKwFdNGQYW5Wk4WFAw"));
+	assert(bloom_contains(bloom0, "rAFlMvBzpkT6Yi+qWrii+81g4AZzH61D9LAo5tPB"));
+	assert(bloom_contains(bloom0, "BKNmXwCpy2l41ZzYHN9GQxcMJS01jTybfcm"));
+	int score10 = 10;
+	if (bloom_contains(bloom0, "JX2WmEZBxyvdD7Pma7b7Eep0sxWxj"))	score10--;
+	if (bloom_contains(bloom0, "NmcKuHR5xz9A4tgzl+2K+ABPh6H7"))	score10--;
+	if (bloom_contains(bloom0, "zMGJShpGoMUUWudHwe"))	score10--;
+	if (bloom_contains(bloom0, "j3QH+MXYBXn2L5r"))	score10--;
+	if (bloom_contains(bloom0, "abc"))	score10--;
+	if (bloom_contains(bloom0, "def"))	score10--;
+	if (bloom_contains(bloom0, "VMVj5gVQwWo6E6sHSmZAYRS9Mg9TiWiF4"))	score10--;
+	if (bloom_contains(bloom0, "O+PDlSdY7ixyxIqwofXDJ/VxKw"))	score10--;
+	if (bloom_contains(bloom0, "BzpkT6Yi+qWrii+81g4AZzH61D9LAo5tPB"))	score10--;
+	if (bloom_contains(bloom0, "ZzYHN9"))	score10--;
+	score10 *= 10;
+	return score10;
+}
