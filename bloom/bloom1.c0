@@ -1,0 +1,43 @@
+#use <conio>
+#use <util>
+
+typedef struct bloom_filter* bloom_t;
+struct bloom_filter {
+	bool[] data;
+	int capacity;
+};
+
+int hash_string(string s) {
+	if (string_length(s) <= 1)	return char_ord(string_charat(s, 0));
+	return hash_string(string_sub(s,0,string_length(s)-1)) * 31 + char_ord(string_charat(s, string_length(s)-1));
+}
+
+bool is_bloom(bloom_t B)
+{
+	return B != NULL && B->capacity > 0;	// NEED REVISION
+}
+
+bloom_t bloom_new(int capacity)
+//@ensures is_bloom(\result);
+{
+	bloom_t new = alloc(struct bloom_filter);
+	new->data = alloc_array(bool, capacity);
+	new->capacity = capacity;
+	return new;
+}
+
+void bloom_add(bloom_t B, string s)
+//@requires is_bloom(B);
+//@ensures is_bloom(B);
+{
+	int hash_index = abs(hash_string(s) % B->capacity);
+	B->data[hash_index] = true;
+}
+
+bool bloom_contains(bloom_t B, string s)
+//@requires is_bloom(B);
+//@ensures is_bloom(B);
+{
+	int hash_index = abs(hash_string(s) % B->capacity);
+	return B->data[hash_index];
+}
