@@ -1,0 +1,30 @@
+#use <conio>
+#use <util>
+
+int hash1(string s) {	// Mult31 from lab
+	if (string_length(s) <= 1)	return char_ord(string_charat(s, 0));
+	return hash1(string_sub(s,0,string_length(s)-1)) * 31 + char_ord(string_charat(s, string_length(s)-1));
+}
+
+int hash2(string s) {	// LCG from lab
+	int out = 0;
+	for (int i = 0; i < string_length(s); i++) {
+		out = (out * 0xE582E1 + 0xD4A1A9) % 0xF61E8F + char_ord(string_charat(s, i));
+	}
+	return out;
+}
+
+int rot(int in) {
+	int tmp = in & 0xF;
+	in = in >> 4 & 0x7FFFFFFF;
+	return in | tmp << 28;
+}
+
+int hash3(string s) {
+	int out = 0;
+	for (int i = 0; i < string_length(s); i++) { 
+		out ^= char_ord(string_charat(s, i));
+		out = rot(out);
+	}
+	return out;
+}

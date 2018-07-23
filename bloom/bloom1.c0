@@ -18,7 +18,7 @@ bool is_bloom(bloom_t B)
 }
 
 bloom_t bloom_new(int capacity)
-//@ensures is_bloom(\result);
+//@ensures is_bloom(\result) && \length(\result->data) == \result->capacity;
 {
 	bloom_t new = alloc(struct bloom_filter);
 	new->data = alloc_array(bool, capacity);
@@ -27,7 +27,7 @@ bloom_t bloom_new(int capacity)
 }
 
 void bloom_add(bloom_t B, string s)
-//@requires is_bloom(B);
+//@requires is_bloom(B) && \length(B->data) == B->capacity;
 //@ensures is_bloom(B);
 {
 	int hash_index = abs(hash_string(s) % B->capacity);
@@ -35,7 +35,7 @@ void bloom_add(bloom_t B, string s)
 }
 
 bool bloom_contains(bloom_t B, string s)
-//@requires is_bloom(B);
+//@requires is_bloom(B) && \length(B->data) == B->capacity;
 //@ensures is_bloom(B);
 {
 	int hash_index = abs(hash_string(s) % B->capacity);
