@@ -22,16 +22,18 @@ int hash2(string s) {
 }
 
 int rot(int in) {
-	int tmp = in & 0xF;
-	in = (in & 0x7FFFFFFF) >> 4;
-	return in | (tmp << 28);
+	int tmp = in & 0xFF;
+	in = (in & 0x7FFFFFFF) >> 8;
+	return in | (tmp << 24);
 }
 
-int hash3(string s) {	// Hash function with avalanche effect, adapted from the Internet.
+int hash3(string s) {
 	int out = 0;
 	for (int i = 0; i < string_length(s); i++) { 
 		out ^= char_ord(string_charat(s, i));
-		out = rot(out);
+		out ^= char_ord(string_charat(s, i)) << 8;
+		out ^= char_ord(string_charat(s, i)) << 16;
+		out ^= char_ord(string_charat(s, i)) << 24;
 	}
 	return out;
 }
@@ -96,3 +98,12 @@ bool bloom_contains(bloom_t bloom, string s)
 	int hash_index3 = abs(hash3(s) % bloom->limit);
 	return get_bit(bloom->data, hash_index1) && get_bit(bloom->data, hash_index2) && get_bit(bloom->data, hash_index3);
 }
+/*
+int main() {
+	int int1 = hash3("iITGkBZmqJSjp2I") % 65536;
+	int int2 = hash3("iITGkBZmqJSjp2J") % 65536;
+	printint(int1); print("\t"); println("iITGkBZmqJSjp2I");
+	printint(int2); print("\t"); println("iITGkBZmqJSjp2J");
+	return 0;
+}
+*/
