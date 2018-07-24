@@ -23,7 +23,7 @@ int hash2(string s) {	// LCG from lab
 int rot(int in) {
 	int tmp = in & 0xF;
 	in = (in & 0x7FFFFFFF) >> 4;
-	return in | tmp << 28;
+	return in | (tmp << 28);
 }
 
 int hash3(string s) {	// Hash function with avalanche effect, adapted from the Internet.
