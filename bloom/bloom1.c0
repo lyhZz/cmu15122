@@ -8,7 +8,8 @@ struct bloom_filter {
 };
 
 int hash_string(string s) {
-	if (string_length(s) <= 1)	return char_ord(string_charat(s, 0));
+	if (string_length(s) < 1) return 0;
+	else if (string_length(s) == 1)	return char_ord(string_charat(s, 0));
 	return hash_string(string_sub(s,0,string_length(s)-1)) * 31 + char_ord(string_charat(s, string_length(s)-1));
 }
 
@@ -18,11 +19,11 @@ bool expected_length(bool[] arr, int length)
 
 bool is_bloom(bloom_t B)
 {
-	return B != NULL && expected_length(B->data, B->capacity);
+	return B != NULL && B->capacity > 0 && expected_length(B->data, B->capacity);
 }
 
 bloom_t bloom_new(int capacity)
-//@ensures is_bloom(\result) && \length(\result->data) == \result->capacity;
+//@ensures is_bloom(\result);
 {
 	bloom_t new = alloc(struct bloom_filter);
 	new->data = alloc_array(bool, capacity);
@@ -31,7 +32,7 @@ bloom_t bloom_new(int capacity)
 }
 
 void bloom_add(bloom_t B, string s)
-//@requires is_bloom(B) && \length(B->data) == B->capacity;
+//@requires is_bloom(B);
 //@ensures is_bloom(B);
 {
 	int hash_index = abs(hash_string(s) % B->capacity);
@@ -39,7 +40,7 @@ void bloom_add(bloom_t B, string s)
 }
 
 bool bloom_contains(bloom_t B, string s)
-//@requires is_bloom(B) && \length(B->data) == B->capacity;
+//@requires is_bloom(B);
 //@ensures is_bloom(B);
 {
 	int hash_index = abs(hash_string(s) % B->capacity);

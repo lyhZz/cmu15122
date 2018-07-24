@@ -7,12 +7,13 @@ struct bloom_filter {
 	int limit;
 };
 
-int hash1(string s) {	// Mult31 from lab
-	if (string_length(s) <= 1)	return char_ord(string_charat(s, 0));
+int hash1(string s) {
+	if (string_length(s) < 1) return 0;
+	else if (string_length(s) == 1)	return char_ord(string_charat(s, 0));
 	return hash1(string_sub(s,0,string_length(s)-1)) * 31 + char_ord(string_charat(s, string_length(s)-1));
 }
 
-int hash2(string s) {	// LCG from lab
+int hash2(string s) {
 	int out = 0;
 	for (int i = 0; i < string_length(s); i++) {
 		out = (out * 0xE582E1 + 0xD4A1A9) % 0xF61E8F + char_ord(string_charat(s, i));
@@ -42,7 +43,6 @@ bool get_bit(int[] A, int i)
 	int index_of_bit = i % 32;
 	int out = A[index_of_int] >> (31 - index_of_bit);
 	out &= 1;
-//	print("int "); printint(index_of_int); print(", bit "); printint(index_of_bit); print(" is "); printint(out); println("");
 	return out == 1;
 }
 
@@ -54,7 +54,6 @@ void set_bit(int[] A, int i)
 	int index_of_bit = i % 32;
 	int mask = 1;
 	mask = mask << (31 - index_of_bit);
-//	print("int "); printint(index_of_int); print(", bit "); printint(index_of_bit); println(" set to 1.");
 	A[index_of_int] |= mask;
 }
 
@@ -63,7 +62,7 @@ bool expected_length(int[] arr, int length)
 {return true;}
 
 bool is_bloom(bloom_t bloom) {
-	return bloom != NULL && expected_length(bloom->data, (bloom->limit + 31) / 32);
+	return bloom != NULL && bloom->limit > 0 && expected_length(bloom->data, (bloom->limit + 31) / 32);
 }
 
 bloom_t bloom_new(int limit)
