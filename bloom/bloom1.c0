@@ -12,9 +12,13 @@ int hash_string(string s) {
 	return hash_string(string_sub(s,0,string_length(s)-1)) * 31 + char_ord(string_charat(s, string_length(s)-1));
 }
 
+bool expected_length(bool[] arr, int length)
+//@requires \length(arr) == length;
+{return true;}
+
 bool is_bloom(bloom_t B)
 {
-	return B != NULL && B->capacity > 0;	// NEED REVISION
+	return B != NULL && expected_length(B->data, B->capacity);
 }
 
 bloom_t bloom_new(int capacity)
