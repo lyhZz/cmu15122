@@ -4,8 +4,7 @@
 typedef struct bloom_filter* bloom_t;
 struct bloom_filter {
 	int[] data;
-	int size_of_table;
-	int size_of_array;
+	int limit;
 };
 
 int hash1(string s) {	// Mult31 from lab
@@ -23,7 +22,7 @@ int hash2(string s) {	// LCG from lab
 
 int rot(int in) {
 	int tmp = in & 0xF;
-	in = in >> 4 & 0x7FFFFFFF;
+	in = (in & 0x7FFFFFFF) >> 4;
 	return in | tmp << 28;
 }
 
@@ -42,8 +41,8 @@ bool get_bit(int[] A, int i)
 	int index_of_int = i / 32;
 	int index_of_bit = i % 32;
 	int out = A[index_of_int] >> (31 - index_of_bit);
-	if (index_of_bit == 0)
-		out &= 0x1;
+	out &= 1;
+//	print("int "); printint(index_of_int); print(", bit "); printint(index_of_bit); print(" is "); printint(out); println("");
 	return out == 1;
 }
 
@@ -55,6 +54,7 @@ void set_bit(int[] A, int i)
 	int index_of_bit = i % 32;
 	int mask = 1;
 	mask = mask << (31 - index_of_bit);
+//	print("int "); printint(index_of_int); print(", bit "); printint(index_of_bit); println(" set to 1.");
 	A[index_of_int] |= mask;
 }
 
@@ -63,16 +63,15 @@ bool expected_length(int[] arr, int length)
 {return true;}
 
 bool is_bloom(bloom_t bloom) {
-	return bloom != NULL && expected_length(bloom->data, bloom->size_of_array);
+	return bloom != NULL && expected_length(bloom->data, (bloom->limit + 31) / 32);
 }
 
-bloom_t bloom_new(int size_of_table)
+bloom_t bloom_new(int limit)
 //@ensures is_bloom(\result);
 {
 	bloom_t new = alloc(struct bloom_filter);
-	new->size_of_table = size_of_table;
-	new->size_of_array = (size_of_table + 31) / 32;
-	new->data = alloc_array(int, new->size_of_array);
+	new->limit = limit;
+	new->data = alloc_array(int, (limit + 31) / 32);
 	return new;
 }
 
@@ -81,11 +80,11 @@ void bloom_add(bloom_t bloom, string s)
 //@ensures is_bloom(bloom);
 {
 	int hash_index;
-	hash_index = abs(hash1(s) % bloom->size_of_table);
+	hash_index = abs(hash1(s) % bloom->limit);
 	set_bit(bloom->data, hash_index);
-	hash_index = abs(hash2(s) % bloom->size_of_table);
+	hash_index = abs(hash2(s) % bloom->limit);
 	set_bit(bloom->data, hash_index);
-	hash_index = abs(hash3(s) % bloom->size_of_table);
+	hash_index = abs(hash3(s) % bloom->limit);
 	set_bit(bloom->data, hash_index);
 }
 
@@ -93,8 +92,8 @@ bool bloom_contains(bloom_t bloom, string s)
 //@requires is_bloom(bloom);
 //@ensures is_bloom(bloom);
 {
-	int hash_index1 = abs(hash1(s) % bloom->size_of_table);
-	int hash_index2 = abs(hash2(s) % bloom->size_of_table);
-	int hash_index3 = abs(hash3(s) % bloom->size_of_table);
+	int hash_index1 = abs(hash1(s) % bloom->limit);
+	int hash_index2 = abs(hash2(s) % bloom->limit);
+	int hash_index3 = abs(hash3(s) % bloom->limit);
 	return get_bit(bloom->data, hash_index1) && get_bit(bloom->data, hash_index2) && get_bit(bloom->data, hash_index3);
 }
