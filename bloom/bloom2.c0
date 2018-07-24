@@ -20,11 +20,41 @@ int rot(int in) {
 	return in | tmp << 28;
 }
 
-int hash3(string s) {
+int hash3(string s) {	// Hash function with avalanche effect, adapted from the Internet.
 	int out = 0;
 	for (int i = 0; i < string_length(s); i++) { 
 		out ^= char_ord(string_charat(s, i));
 		out = rot(out);
 	}
 	return out;
+}
+
+bool get_bit(int[] A, int i)
+//@requires 0 <= i && i/32 < \length(A);
+{	// Adapted from midterm
+	int index_of_int = i / 32;
+	int index_of_bit = i % 32;
+	int out = A[index_of_int] >> (31 - index_of_bit);
+	if (index_of_bit == 0)
+		out &= 0x1;
+	return out == 1;
+}
+
+void set_bit(int[] A, int i)
+//@requires 0 <= i && i/32 < \length(A);
+//@ensures get_bit(A, i);
+{
+	int index_of_int = i / 32;
+	int index_of_bit = i % 32;
+	int mask = 1;
+	for (int a = 0; a < 31 - index_of_bit; a++)
+		mask = mask << 1;
+	A[index_of_int] |= mask;
+}
+
+int main() {
+	int[] A = alloc_array(int, 100);
+	set_bit(A, 98);
+	printbool(get_bit(A, 98)); println("");
+	return 0;
 }

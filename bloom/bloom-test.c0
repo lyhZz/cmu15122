@@ -221,8 +221,5 @@ int main() {
 	if (bloom_contains(bloom1, "Why???!!!"))	score50--;
 	score50 *= 5;
 	
-	int score100 = 100;
-	bloom_t bloom1 = bloom_new(100);
-	
 	return (score10 + score50) / 2;
 }
