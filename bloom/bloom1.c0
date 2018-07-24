@@ -23,6 +23,7 @@ bool is_bloom(bloom_t B)
 }
 
 bloom_t bloom_new(int capacity)
+//@requires capacity > 0;
 //@ensures is_bloom(\result);
 {
 	bloom_t new = alloc(struct bloom_filter);
