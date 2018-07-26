@@ -45,14 +45,14 @@ struct rope_node {
 };
 
 bool is_rope(rope* R) {
-	return R != NULL && ((R->left == NULL && R->right == NULL && R->len == string_length(R->data)) || (R->left != NULL && R->right != NULL && R->length == R->left->length + R->right->length && is_rope(R->left) && is_rope(R->right)));
+	return R != NULL && ((R->left == NULL && R->right == NULL && R->len == string_length(R->data)) || (R->left != NULL && R->right != NULL && R->len == R->left->len + R->right->len && is_rope(R->left) && is_rope(R->right)));
 }
 
 rope_t rope_new(string str)
-//@requires string_length(str) > 0;
+//@requires string_length(str) >= 0;
 //@ensures is_rope(\result);
 {
-	rope_t R = alloc(rope_node);
+	rope_t R = alloc(rope);
 	R->data = str;
 	R->len = string_length(str);
 	R->left = NULL;
@@ -62,16 +62,16 @@ rope_t rope_new(string str)
 
 int rope_length(rope_t R)
 //@requires is_rope(R);
-//@ensures \result > 0 && is_rope(R);
+//@ensures \result >= 0 && is_rope(R);
 {
 	return R->len;
 }
 
 rope_t rope_join(rope_t R, rope_t S)
-//@requires is_rope(R) is_rope(S);
+//@requires is_rope(R) && is_rope(S);
 //@ensures is_rope(\result) && rope_length(\result) == rope_length(R) + rope_length(S);
 {
-	rope_t out = alloc(rope_node);
+	rope_t out = alloc(rope);
 	out->left = R;
 	out->right = S;
 	out->len = rope_length(R) + rope_length(S);

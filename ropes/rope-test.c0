@@ -1,0 +1,46 @@
+#use <conio>
+#use <string>
+#use <util>
+
+int main() {
+	rope_t segment0 = rope_new("Sometimes ");
+	rope_t segment1 = rope_new("I ");
+	rope_t segment2 = rope_new("wish ");
+	rope_t segment3 = rope_new("I ");
+	rope_t segment4 = rope_new("were ");
+	rope_t segment5 = rope_new("an ");
+	rope_t segment6 = rope_new("angel, ");
+	rope_t segment7 = rope_new("sometimes ");
+	rope_t segment8 = rope_new("I ");
+	rope_t segment9 = rope_new("wish ");
+	rope_t segment10 = rope_new("I ");
+	rope_t segment11 = rope_new("were ");
+	rope_t segment12 = rope_new("you.");
+	
+	rope_t combined0 = rope_join(segment0, segment1);
+	rope_t combined1 = rope_join(segment2, segment3);
+	rope_t combined2 = rope_join(segment4, segment5);
+	rope_t combined3 = rope_join(segment6, segment7);
+	rope_t combined4 = rope_join(segment8, segment9);
+	rope_t combined5 = rope_join(segment10, segment11);
+	
+	rope_t combined6 = rope_join(combined0, combined1);
+	rope_t combined7 = rope_join(combined2, combined3);
+	rope_t combined8 = rope_join(combined4, combined5);
+	
+	rope_t combined9 = rope_join(combined6, combined7);
+	rope_t combined10 = rope_join(combined8, segment12);
+	
+	rope_t final = rope_join(combined9, combined10);
+	string str = rope_tostring(final);
+	
+	println(str);
+	
+	rope_t rope_sub0_10 = rope_sub(final, 0, 10);
+	string str_sub0_10 = string_sub(str, 0, 10);
+	
+	println(rope_tostring(rope_sub0_10));
+	println(str_sub0_10);
+	
+	return 0;
+}
