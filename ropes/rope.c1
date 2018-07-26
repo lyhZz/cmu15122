@@ -1,6 +1,6 @@
 /*
  * Ropes
- * 
+ *
  * 15-122 Principles of Imperative Computation
  */
 
@@ -15,24 +15,65 @@
 // typedef _______ rope_t;
 typedef struct rope_node* rope_t;
 
-int    rope_length(rope_t R)
-  /*@ensures \result >= 0; @*/ ;
+int rope_length(rope_t R)
+	/*@ensures \result >= 0; @*/ ;
 rope_t rope_new(string s)
-  /*@ensures rope_length(\result) == string_length(s); @*/ ;
+	/*@ensures rope_length(\result) == string_length(s); @*/ ;
 rope_t rope_join(rope_t R, rope_t S)
-  /*@requires rope_length(R) <= int_max() - rope_length(S); @*/ 
-  /*@ensures rope_length(\result) == rope_length(R) + rope_length(S); @*/ ;
+	/*@requires rope_length(R) <= int_max() - rope_length(S); @*/
+	/*@ensures rope_length(\result) == rope_length(R) + rope_length(S); @*/ ;
 string rope_tostring(rope_t R)
-  /*@ensures string_length(\result) == rope_length(R); @*/ ;
-char   rope_charat(rope_t R, int i) 
-  /*@requires 0 <= i && i < rope_length(R); @*/ ;
+	/*@ensures string_length(\result) == rope_length(R); @*/ ;
+char	 rope_charat(rope_t R, int i)
+	/*@requires 0 <= i && i < rope_length(R); @*/ ;
 rope_t rope_sub(rope_t R, int lo, int hi)
-  /*@requires 0 <= lo && lo <= hi && hi <= rope_length(R); @*/ 
-  /*@ensures rope_length(\result) == hi - lo; @*/ ;
-void   rope_reduce(rope_t[] A, int n)
-  /*@requires n == \length(A); @*/ ;
+	/*@requires 0 <= lo && lo <= hi && hi <= rope_length(R); @*/
+	/*@ensures rope_length(\result) == hi - lo; @*/ ;
+void	 rope_reduce(rope_t[] A, int n)
+	/*@requires n == \length(A); @*/ ;
 
 /***********************************/
 /* Implementation (edit this part) */
 /***********************************/
 
+typedef struct rope_node rope;
+struct rope_node {
+	int len;
+	rope* left;
+	rope* right;
+	string data;
+};
+
+bool is_rope(rope* R) {
+	return R != NULL && ((R->left == NULL && R->right == NULL && R->len == string_length(R->data)) || (R->left != NULL && R->right != NULL && R->length == R->left->length + R->right->length && is_rope(R->left) && is_rope(R->right)));
+}
+
+rope_t rope_new(string str)
+//@requires string_length(str) > 0;
+//@ensures is_rope(\result);
+{
+	rope_t R = alloc(rope_node);
+	R->data = str;
+	R->len = string_length(str);
+	R->left = NULL;
+	R->right = NULL;
+	return R;
+}
+
+int rope_length(rope_t R)
+//@requires is_rope(R);
+//@ensures \result > 0 && is_rope(R);
+{
+	return R->len;
+}
+
+rope_t rope_join(rope_t R, rope_t S)
+//@requires is_rope(R) is_rope(S);
+//@ensures is_rope(\result) && rope_length(\result) == rope_length(R) + rope_length(S);
+{
+	rope_t out = alloc(rope_node);
+	out->left = R;
+	out->right = S;
+	out->len = rope_length(R) + rope_length(S);
+	return out;
+}
