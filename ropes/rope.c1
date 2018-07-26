@@ -106,28 +106,22 @@ rope_t rope_sub(rope_t R, int lo, int hi)
 {
 	if (lo == 0 && hi == rope_length(R))
 		return R;
+	
 	else if (R->left == NULL && R->right == NULL && R->len == string_length(R->data))
 		return rope_new(string_sub(R->data, lo, hi));
-	else if (lo == 0 && hi < rope_length(R)) {
-		rope_t out = alloc(rope_node);
-		out->left = R->left;
-		out->right = rope_sub(R->right, 0, hi - rope_length(R->left));
-		return out;
-	}
-	else if (hi == rope_length(R) && 0 < lo && lo < rope_length(R->left)) {
-		rope_t out = alloc(rope_node);
-		out->left = rope_sub(R->left, lo, rope_length(R->left));
-		out->right = R->right;
-		return out;
-	}
+	
+	else if (lo == 0 && rope_length(R->left) <= hi && hi < rope_length(R))
+		return rope_join(R->left, rope_sub(R->right, 0, hi - rope_length(R->left)));
+	
+	else if (hi == rope_length(R) && 0 < lo && lo < rope_length(R->left))
+		return rope_join(rope_sub(R->left, lo, rope_length(R->left)), R->right);
+	
 	else if (hi <= rope_length(R->left))
 		return rope_sub(R->left, lo, hi);
+	
 	else if (lo >= rope_length(R->left))
 		return rope_sub(R->right, lo - rope_length(R->left), hi - rope_length(R->left));
-	else {
-		rope_t out = alloc(rope_node);
-		out->left = rope_sub(R->left, lo, rope_length(R->left));
-		out->right = rope_sub(R->right, rope_length(R->left), hi - rope_length(R->left));
-		return out;
-	}
+	
+	else
+		return rope_join(rope_sub(R->left, lo, rope_length(R->left)), rope_sub(R->right, rope_length(R->left), hi - rope_length(R->left)));
 }
