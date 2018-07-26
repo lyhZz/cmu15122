@@ -1,0 +1,8 @@
+#use <conio>
+#use <string>
+#use <util>
+
+int main() {
+	
+	return 0;
+}
