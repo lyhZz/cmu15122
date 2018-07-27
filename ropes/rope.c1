@@ -154,18 +154,18 @@ bool equiv(void* in0, void* in1)
 rope_t reduce(hdict_t D, rope_t R)
 //@requires is_rope(R);
 {
-	rope_t replacement = R;
+	rope_t out = R;
 	if (hdict_lookup(D, (void*)R) == NULL) {
 		hdict_insert(D, (void*)R, (void*)R);
 	}
 	else {
 		void* search_result = hdict_lookup(D, (void*)R);
 		//@assert \hastag(rope_t, search_result);
-		replacement = (rope_t)search_result;
+		out = (rope_t)search_result;
 	}
 	if (R->left != NULL) R->left = reduce(D, R->left);
 	if (R->right != NULL) R->right = reduce(D, R->right);
-	return replacement;
+	return out;
 }
 
 void rope_reduce(rope_t[] A, int n)
