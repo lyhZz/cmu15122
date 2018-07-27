@@ -3,7 +3,7 @@
 #use <util>
 
 int main() {
-	rope_t segment0 = rope_new("Sometimes ");
+	rope_t segment0 = rope_new("sometimes ");
 	rope_t segment1 = rope_new("I ");
 	rope_t segment2 = rope_new("wish ");
 	rope_t segment3 = rope_new("I ");
@@ -32,15 +32,18 @@ int main() {
 	rope_t combined10 = rope_join(combined8, segment12);
 	
 	rope_t final = rope_join(combined9, combined10);
-	string str = rope_tostring(final);
+	string str = "sometimes I wish I were an angel, sometimes I wish I were you";
 	
-	println(str);
+	for (int i = 0; i < string_length(str); i++)
+		assert(string_charat(str, i) == rope_charat(final, i));
 	
-	rope_t rope_sub0_10 = rope_sub(final, 0, 10);
-	string str_sub0_10 = string_sub(str, 0, 10);
+	int arr_size = 1;
+	rope_t[] A = alloc_array(rope_t, arr_size);
+	A[0] = final;
+	rope_reduce(A, arr_size);
 	
-	println(rope_tostring(rope_sub0_10));
-	println(str_sub0_10);
+	for (int i = 0; i < string_length(str); i++)
+		assert(string_charat(str, i) == rope_charat(final, i));
 	
 	return 0;
 }

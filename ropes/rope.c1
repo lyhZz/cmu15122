@@ -45,7 +45,7 @@ struct rope_node {
 };
 
 bool is_rope(rope* R) {
-	return R != NULL && ((R->left == NULL && R->right == NULL && R->len == string_length(R->data)) || (R->left != NULL && R->right != NULL && R->len == R->left->len + R->right->len && is_rope(R->left) && is_rope(R->right)));
+	return R == NULL || (R->left == NULL && R->right == NULL && R->len > 0 && R->len == string_length(R->data)) || (R->left != NULL && R->right != NULL && R->len > 0 && R->len == R->left->len + R->right->len && is_rope(R->left) && is_rope(R->right));
 }
 
 rope_t rope_new(string str)
@@ -123,5 +123,56 @@ rope_t rope_sub(rope_t R, int lo, int hi)
 		return rope_sub(R->right, lo - rope_length(R->left), hi - rope_length(R->left));
 	
 	else
-		return rope_join(rope_sub(R->left, lo, rope_length(R->left)), rope_sub(R->right, rope_length(R->left), hi - rope_length(R->left)));
+		return rope_join(rope_sub(R->left, lo, rope_length(R->left)), rope_sub(R->right, 0, hi - rope_length(R->left)));
+}
+
+int hash(void* in)
+//@requires \hastag(rope_t, in);
+//@requires is_rope((rope_t)in);
+{
+	rope_t R = (rope_t)in;
+	int out = 0;
+	for (int i = 0; i < rope_length(R); i++)
+		out = (out * 0xE582E1 + 0xD4A1A9) % 0xF61E8F + char_ord(rope_charat(R, i));
+	return out;
+}
+
+bool equiv(void* in0, void* in1)
+//@requires \hastag(rope_t, in0) && \hastag(rope_t, in1);
+//@requires is_rope((rope_t)in0) && is_rope((rope_t)in1);
+{
+	rope_t A = (rope_t)in0;
+	rope_t B = (rope_t)in1;
+	if (rope_length(A) != rope_length(B))
+		return false;
+	for (int i = 0; i < rope_length(A); i++)
+		if (rope_charat(A, i) != rope_charat(B, i))
+			return false;
+	return true;
+}
+
+rope_t reduce(hdict_t D, rope_t R)
+//@requires is_rope(R);
+{
+	rope_t replacement = R;
+	if (hdict_lookup(D, (void*)R) == NULL) {
+		hdict_insert(D, (void*)R, (void*)R);
+	}
+	else {
+		void* search_result = hdict_lookup(D, (void*)R);
+		//@assert \hastag(rope_t, search_result);
+		replacement = (rope_t)search_result;
+	}
+	if (R->left != NULL) R->left = reduce(D, R->left);
+	if (R->right != NULL) R->right = reduce(D, R->right);
+	return replacement;
+}
+
+void rope_reduce(rope_t[] A, int n)
+//@requires \length(A) == n;
+{
+	hdict_t D = hdict_new(n, &equiv, &hash);
+	for (int i = 0; i < n; i++) {
+		A[i] = reduce(D, A[i]);
+	}
 }

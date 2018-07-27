@@ -144,7 +144,7 @@ void hdict_resize(hdict* H)
   chain*[] old_table = H->table;
   chain*[] new_table = alloc_array(chain*, new_capacity);
 
-  print("(hdict resizing to "); printint(new_capacity); println(")");
+  //print("(hdict resizing to "); printint(new_capacity); println(")");
   H->capacity = new_capacity; // is_hdict now violated!
   H->table = new_table; // is_hdict restored *only* because we don't check size
 
