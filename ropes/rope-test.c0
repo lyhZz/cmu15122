@@ -66,10 +66,8 @@ int main() {
 	assert(happy_birthday->left->right == y_birth);
 	assert(happy_birthday->right == day);
 	
-	string hbd = "happy birthday!";
-	
 	for (int i = 0; i < rope_length(happy_birthday); i++)
-		assert(string_charat(hbd, i) == rope_charat(happy_birthday, i));
+		assert(string_charat("happy birthday!", i) == rope_charat(happy_birthday, i));
 	
 	rope_t t = rope_new("t");
 	rope_t otally = rope_new("otally");
@@ -92,22 +90,19 @@ int main() {
 	// SUB
 	
 	rope_t otallyefficient = rope_sub(totallyefficient, 1, 16);
-	string otallyefficientstr = "otallyefficient";
 	for (int i = 0; i < rope_length(otallyefficient); i++)
-		assert(string_charat(otallyefficientstr, i) == rope_charat(otallyefficient, i));
+		assert(string_charat("otallyefficient", i) == rope_charat(otallyefficient, i));
 	assert(otallyefficient->left == otally);
 	assert(otallyefficient->right == efficient);
 	
 	rope_t otallyeffi = rope_sub(totallyefficient, 1, 11);
-	string otallyeffistr = "otallyeffi";
 	for (int i = 0; i < rope_length(otallyeffi); i++)
-		assert(string_charat(otallyeffistr, i) == rope_charat(otallyeffi, i));
+		assert(string_charat("otallyeffi", i) == rope_charat(otallyeffi, i));
 	assert(otallyeffi->left == otally);
 	
 	rope_t tallyeffi = rope_sub(totallyefficient, 2, 11);
-	string tallyeffistr = "tallyeffi";
 	for (int i = 0; i < rope_length(tallyeffi); i++)
-		assert(string_charat(tallyeffistr, i) == rope_charat(tallyeffi, i));
+		assert(string_charat("tallyeffi", i) == rope_charat(tallyeffi, i));
 	
 	// REDUCE
 	
@@ -128,6 +123,9 @@ int main() {
 	assert(abracadabra->left->left == abracadabra->right->left->right);
 	assert(abracadabra->left->right == abracadabra->right->right);
 	
+	for (int i = 0; i < rope_length(abracadabra); i++)
+		assert(string_charat("abracadabra", i) == rope_charat(abracadabra, i));
+	
 	rope_t abr = rope_new("abr");
 	rope_t a = rope_new("a");
 	rope_t abra2 = rope_join(abr, a);
@@ -137,6 +135,64 @@ int main() {
 	rope_reduce(A, arr_size);
 	assert(abracadabra != NULL && abracadabra->right != NULL);
 	assert(abracadabra->left == abracadabra->right->right);
+	
+	for (int i = 0; i < rope_length(abracadabra); i++)
+		assert(string_charat("abracadabra", i) == rope_charat(abracadabra, i));
+	
+	arr_size = 3;
+	rope_t[] B = alloc_array(rope_t, arr_size);
+	
+	rope_t br = rope_new("br");
+	abr = rope_join(a, br);
+	rope_t a2 = rope_new("a");
+	rope_t abr2 = rope_new("abr");
+	abra = rope_join(abr2, a2);
+	rope_t a3 = rope_new("a");
+	rope_t br2 = rope_new("br");
+	rope_t a4 = rope_new("a");
+	rope_t bra = rope_join(br2, a4);
+	abra2 = rope_join(a4, bra);
+	B[0] = abr2;
+	B[1] = abra;
+	B[2] = abra2;
+	rope_reduce(B, arr_size);
+	
+	assert(string_compare(rope_tostring(B[0]), "abr") == 0);
+	assert(string_compare(rope_tostring(B[1]), "abra") == 0);
+	assert(string_compare(rope_tostring(B[2]), "abra") == 0);
+	
+	assert(B[1] == B[2] && B[0] != NULL && B[1] != NULL);
+	assert(B[0] == B[1]->left);
+	
+	rope_t a1 = rope_new("a");
+	a2 = rope_new("a");
+	a3 = rope_new("a");
+	a4 = rope_new("a");
+	rope_t a5 = rope_new("a");
+	rope_t a6 = rope_new("a");
+	rope_t a7 = rope_new("a");
+	rope_t a8 = rope_new("a");
+	rope_t a9 = rope_new("a");
+	rope_t a10 = rope_new("a");
+	rope_t a11 = rope_new("a");
+	rope_t a12 = rope_new("a");
+	rope_t a13 = rope_new("a");
+	
+	rope_t aaaaa = rope_join(rope_join(rope_join(rope_join(a1, a2), a3), a4), a5);
+	rope_t aaaaaaaa = rope_join(rope_join(rope_join(a6, a7), rope_join(a8, a9)), rope_join(rope_join(a10, a11), rope_join(a12, a13)));
+	arr_size = 2;
+	rope_t[] C = alloc_array(rope_t, arr_size);
+	C[0] = aaaaa;
+	C[1] = aaaaaaaa;
+	rope_reduce(C, arr_size);
+	assert(string_compare(rope_tostring(C[0]), "aaaaa") == 0);
+	assert(string_compare(rope_tostring(C[1]), "aaaaaaaa") == 0);
+	assert(C[1]->left == C[1]->right);
+	assert(C[1]->left == C[0]->left);
+	assert(C[0]->left->left->left->left == C[0]->right);
+	assert(C[0]->left->left->left->left == C[0]->left->right);
+	assert(C[0]->left->left->left->left == C[0]->left->left->right);
+	assert(C[0]->left->left->left->left == C[0]->left->left->left->right);
 	
 	return 0;
 }

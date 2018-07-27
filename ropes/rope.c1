@@ -52,6 +52,8 @@ rope_t rope_new(string str)
 //@requires string_length(str) >= 0;
 //@ensures is_rope(\result) && rope_length(\result) == string_length(str);
 {
+	if (string_length(str) == 0)
+		return NULL;
 	rope_t R = alloc(rope);
 	R->data = str;
 	R->len = string_length(str);
@@ -74,6 +76,10 @@ rope_t rope_join(rope_t R, rope_t S)
 //@requires is_rope(R) && is_rope(S) && rope_length(R) < int_max() - rope_length(S);
 //@ensures is_rope(\result) && rope_length(\result) == rope_length(R) + rope_length(S);
 {
+	if (R == NULL)
+		return S;
+	if (S == NULL)
+		return R;
 	rope_t out = alloc(rope);
 	out->left = R;
 	out->right = S;
@@ -109,7 +115,7 @@ rope_t rope_sub(rope_t R, int lo, int hi)
 //@requires 0 <= lo && lo <= hi && hi <= rope_length(R);
 //@ensures rope_length(\result) == hi - lo;
 {
-	if (R == NULL)
+	if (R == NULL || lo == hi)
 		return NULL;
 	
 	else if (lo == 0 && hi == rope_length(R))
@@ -155,9 +161,12 @@ bool equiv(void* in0, void* in1)
 
 rope_t reduce(hdict_t D, rope_t R)
 //@requires is_rope(R);
+//@ensures is_rope(\result);
 {
 	rope_t out = R;
 	if (hdict_lookup(D, (void*)R) == NULL) {
+		if (R->left != NULL) R->left = reduce(D, R->left);
+		if (R->right != NULL) R->right = reduce(D, R->right);
 		hdict_insert(D, (void*)R, (void*)R);
 	}
 	else {
@@ -165,16 +174,15 @@ rope_t reduce(hdict_t D, rope_t R)
 		//@assert \hastag(rope_t, search_result);
 		out = (rope_t)search_result;
 	}
-	if (R->left != NULL) R->left = reduce(D, R->left);
-	if (R->right != NULL) R->right = reduce(D, R->right);
 	return out;
 }
 
 void rope_reduce(rope_t[] A, int n)
 //@requires \length(A) == n;
 {
+	if (n <= 0) return;
 	hdict_t D = hdict_new(n, &equiv, &hash);
-	for (int i = 0; i < n; i++) {
-		A[i] = reduce(D, A[i]);
-	}
+	for (int i = 0; i < n; i++)
+		if (A[i] != NULL)
+			A[i] = reduce(D, A[i]);
 }
