@@ -37,6 +37,12 @@ int main() {
 	for (int i = 0; i < string_length(str); i++)
 		assert(string_charat(str, i) == rope_charat(final, i));
 	
+	rope_t sub1 = rope_sub(final, 5, 30);
+	string substr1 = string_sub(str, 5, 30);
+	
+	for (int i = 0; i < string_length(substr1); i++)
+		assert(string_charat(substr1, i) == rope_charat(sub1, i));
+	
 	int arr_size = 1;
 	rope_t[] A = alloc_array(rope_t, arr_size);
 	A[0] = final;
@@ -44,6 +50,93 @@ int main() {
 	
 	for (int i = 0; i < string_length(str); i++)
 		assert(string_charat(str, i) == rope_charat(final, i));
+	
+	// JOIN
+	
+	rope_t happ = rope_new("happ");
+	rope_t y_birth = rope_new("y birth");
+	rope_t happy_birth = rope_join(happ, y_birth);
+	assert(happy_birth->left == happ);
+	assert(happy_birth->right == y_birth);
+	
+	rope_t day = rope_new("day!");
+	rope_t happy_birthday = rope_join(happy_birth, day);
+	assert(happy_birthday->left == happy_birth);
+	assert(happy_birthday->left->left == happ);
+	assert(happy_birthday->left->right == y_birth);
+	assert(happy_birthday->right == day);
+	
+	string hbd = "happy birthday!";
+	
+	for (int i = 0; i < rope_length(happy_birthday); i++)
+		assert(string_charat(hbd, i) == rope_charat(happy_birthday, i));
+	
+	rope_t t = rope_new("t");
+	rope_t otally = rope_new("otally");
+	rope_t totally = rope_join(t, otally);
+	assert(totally->left == t);
+	assert(totally->right == otally);
+	
+	rope_t efficien = rope_new("efficien");
+	rope_t t2 = rope_new("t");
+	rope_t efficient = rope_join(efficien, t2);
+	assert(efficient->left == efficien);
+	assert(efficient->right == t2);
+	
+	rope_t totallyefficient = rope_join(totally, efficient);
+	assert(totallyefficient->left == totally);
+	assert(totallyefficient->left->left == t);
+	assert(totallyefficient->left->right == otally);
+	assert(totallyefficient->right == efficient);
+	
+	// SUB
+	
+	rope_t otallyefficient = rope_sub(totallyefficient, 1, 16);
+	string otallyefficientstr = "otallyefficient";
+	for (int i = 0; i < rope_length(otallyefficient); i++)
+		assert(string_charat(otallyefficientstr, i) == rope_charat(otallyefficient, i));
+	assert(otallyefficient->left == otally);
+	assert(otallyefficient->right == efficient);
+	
+	rope_t otallyeffi = rope_sub(totallyefficient, 1, 11);
+	string otallyeffistr = "otallyeffi";
+	for (int i = 0; i < rope_length(otallyeffi); i++)
+		assert(string_charat(otallyeffistr, i) == rope_charat(otallyeffi, i));
+	assert(otallyeffi->left == otally);
+	
+	rope_t tallyeffi = rope_sub(totallyefficient, 2, 11);
+	string tallyeffistr = "tallyeffi";
+	for (int i = 0; i < rope_length(tallyeffi); i++)
+		assert(string_charat(tallyeffistr, i) == rope_charat(tallyeffi, i));
+	
+	// REDUCE
+	
+	rope_t ab = rope_new("ab");
+	rope_t ra = rope_new("ra");
+	rope_t abra = rope_join(ab, ra);
+	assert(abra->left == ab);
+	rope_t cad = rope_new("cad");
+	rope_t ab2 = rope_new("ab");
+	rope_t cadab = rope_join(cad, ab2);
+	rope_t ra2 = rope_new("ra");
+	rope_t cadabra = rope_join(cadab, ra2);
+	assert(cadabra->left->right == ab2);
+	rope_t abracadabra = rope_join(abra, cadabra);
+	A[0] = abracadabra;
+	rope_reduce(A, arr_size);
+	assert(abracadabra != NULL && abracadabra->left != NULL && abracadabra->right != NULL && abracadabra->right->left != NULL);
+	assert(abracadabra->left->left == abracadabra->right->left->right);
+	assert(abracadabra->left->right == abracadabra->right->right);
+	
+	rope_t abr = rope_new("abr");
+	rope_t a = rope_new("a");
+	rope_t abra2 = rope_join(abr, a);
+	cadabra = rope_join(cad, abra);
+	abracadabra = rope_join(abra2, cadabra);
+	A[0] = abracadabra;
+	rope_reduce(A, arr_size);
+	assert(abracadabra != NULL && abracadabra->right != NULL);
+	assert(abracadabra->left == abracadabra->right->right);
 	
 	return 0;
 }

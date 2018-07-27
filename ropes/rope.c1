@@ -50,7 +50,7 @@ bool is_rope(rope* R) {
 
 rope_t rope_new(string str)
 //@requires string_length(str) >= 0;
-//@ensures is_rope(\result);
+//@ensures is_rope(\result) && rope_length(\result) == string_length(str);
 {
 	rope_t R = alloc(rope);
 	R->data = str;
@@ -64,11 +64,14 @@ int rope_length(rope_t R)
 //@requires is_rope(R);
 //@ensures \result >= 0 && is_rope(R);
 {
-	return R->len;
+	if (R == NULL)
+		return 0;
+	else
+		return R->len;
 }
 
 rope_t rope_join(rope_t R, rope_t S)
-//@requires is_rope(R) && is_rope(S);
+//@requires is_rope(R) && is_rope(S) && rope_length(R) < int_max() - rope_length(S);
 //@ensures is_rope(\result) && rope_length(\result) == rope_length(R) + rope_length(S);
 {
 	rope_t out = alloc(rope);
@@ -82,7 +85,9 @@ string rope_tostring(rope_t R)
 //@requires is_rope(R);
 //@ensures string_length(\result) == rope_length(R);
 {
-	if (R->left == NULL && R->right == NULL && R->len == string_length(R->data))
+	if (R == NULL)
+		return "";
+	else if (R->left == NULL && R->right == NULL && R->len == string_length(R->data))
 		return R->data;
 	else
 		return string_join(rope_tostring(R->left), rope_tostring(R->right));
@@ -104,17 +109,14 @@ rope_t rope_sub(rope_t R, int lo, int hi)
 //@requires 0 <= lo && lo <= hi && hi <= rope_length(R);
 //@ensures rope_length(\result) == hi - lo;
 {
-	if (lo == 0 && hi == rope_length(R))
+	if (R == NULL)
+		return NULL;
+	
+	else if (lo == 0 && hi == rope_length(R))
 		return R;
 	
 	else if (R->left == NULL && R->right == NULL && R->len == string_length(R->data))
 		return rope_new(string_sub(R->data, lo, hi));
-	
-	else if (lo == 0 && rope_length(R->left) <= hi && hi < rope_length(R))
-		return rope_join(R->left, rope_sub(R->right, 0, hi - rope_length(R->left)));
-	
-	else if (hi == rope_length(R) && 0 < lo && lo < rope_length(R->left))
-		return rope_join(rope_sub(R->left, lo, rope_length(R->left)), R->right);
 	
 	else if (hi <= rope_length(R->left))
 		return rope_sub(R->left, lo, hi);
