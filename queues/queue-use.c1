@@ -26,16 +26,14 @@ bool incr(void* x)
 void* find_negative(void* accum, void* x)
 //@requires x == NULL || \hastag(int*, x);
 //@requires accum == NULL || \hastag(int*, accum);
-//@ensures \hastag(int*, \result);
+//@ensures \result == NULL || \hastag(int*, \result);
 {
-	if (accum == NULL)
-		return x;
-	else if (x == NULL || *((int*)accum) < 0)
+	if (accum != NULL)
 		return accum;
-	else if (*((int*)x) < 0)
+	else if (x != NULL && *((int*)x) < 0)
 		return x;
 	else
-		return x;
+		return NULL;
 }
 
 void* copy(void* Q, void* elem)
