@@ -136,13 +136,11 @@ void* queue_iterate(queue_t Q, void* base, iterate_fn *f) {
 
 void queue_free(queue_t Q, free_fn *f) {
 	REQUIRES(Q != NULL);
-	if (f == NULL)
-		free(Q);
-	else {
+	if (f != NULL) {
 		while (queue_size(Q) > 0) {
 			void* v = deq(Q);
 			(*f)(v);
 		}
-		free(Q);
 	}
+	free(Q);
 }
