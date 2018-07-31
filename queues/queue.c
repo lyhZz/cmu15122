@@ -39,7 +39,11 @@ bool is_queue(queue_t Q) {
 queue_t queue_new()
 //@ensures \result != NULL && is_queue(\result);
 {
-	queue_t Q = (queue_t)malloc(sizeof(queue));
+	queue_t Q = malloc(sizeof(queue));
+	if (Q == NULL) {
+		fprintf(stderr, "Allocation failed!\n");
+		abort();
+	}
 	Q->front = NULL;
 	Q->back = NULL;
 	Q->size = 0;
@@ -57,7 +61,11 @@ void enq(queue_t Q, void *x)
 //@requires is_queue(Q);
 //@ensures is_queue(Q);
 {
-	list *node = (list*)malloc(sizeof(list));
+	list *node = malloc(sizeof(list));
+	if (node == NULL) {
+		fprintf(stderr, "Allocation failed!\n");
+		abort();
+	}
 	node->data = x;
 	node->next = NULL;
 	if (queue_size(Q) == 0)

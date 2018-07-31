@@ -10,7 +10,11 @@ int main() {
 	int* v;
 	
 	for (int i = 0; i < 10; i++) {
-		v = (int*)malloc(sizeof(int));
+		v = malloc(sizeof(int));
+		if (v == NULL) {
+			fprintf(stderr, "Allocation failed!\n");
+			abort();
+		}
 		*v = i;
 		enq(Q, (void*)v);
 	}
@@ -18,16 +22,24 @@ int main() {
 	for (int i = 9; i >= 0; i--) {
 		int* a = (int*)deq(Q);
 		assert(*a == i);
+		free(a);
 	}
 	for (int i = 0; i < 20; i++) {
-		v = (int*)malloc(sizeof(int));
+		v = malloc(sizeof(int));
+		if (v == NULL) {
+			fprintf(stderr, "Allocation failed!\n");
+			abort();
+		}
 		*v = i;
 		enq(Q, (void*)v);
 	}
 	assert(*(int*)queue_peek(Q, 10) == 10);
-	while (queue_size(Q) > 0)
-		deq(Q);
-	free(v);
+	
+	while (queue_size(Q) > 0) {
+		v = (int*)deq(Q);
+		free(v);
+	}
+	free(Q);
 /*	
 	for (int i = -10; i < 10; i++) {
 		v = (int*)malloc(sizeof(int));
