@@ -153,11 +153,19 @@ int main() {
 	
 	v = alloc(int);
 	*v = 10;
-	c = (int*)queue_iterate(Q, (void*)v, &find_negative);
+	c = (int*)queue_iterate(Q, (void*)v, &insert);
 	assert(c == v);
 	
-	while (queue_size(Q) > 0) {
-		printint(*(int*)deq(Q)); println("");
+	assert(*(int*)deq(Q) == 10);
+	assert(*(int*)deq(Q) == 15);
+	
+	while (queue_size(Q) > 0)
+		deq(Q);
+	
+	for (int i = -10; i < 10; i += 4) {
+		v = alloc(int);
+		*v = i;
+		enq(Q, (void*)v);
 	}
 	
 	queue_t P = (queue_t)queue_iterate(Q, (void*)queue_new(), &copy);
