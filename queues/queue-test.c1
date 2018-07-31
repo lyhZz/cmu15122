@@ -93,6 +93,73 @@ int main() {
 	int* c = (int*)queue_iterate(Q, NULL, &find_negative);
 	assert(*c == -10);
 	
+	while (queue_size(Q) > 0)
+		deq(Q);
+	
+	v = alloc(int);
+	*v = 5;
+	enq(Q, (void*)v);
+	
+	v = alloc(int);
+	*v = 10;
+	enq(Q, (void*)v);
+	
+	v = alloc(int);
+	*v = 65;
+	enq(Q, (void*)v);
+	
+	v = alloc(int);
+	*v = -10;
+	enq(Q, (void*)v);
+	
+	v = alloc(int);
+	*v = 1337;
+	enq(Q, (void*)v);
+	
+	c = (int*)queue_iterate(Q, NULL, &find_negative);
+	assert(*c == -10);
+	
+	while (queue_size(Q) > 0)
+		deq(Q);
+	
+	v = alloc(int);
+	*v = 89;
+	enq(Q, (void*)v);
+	
+	v = alloc(int);
+	*v = 32;
+	enq(Q, (void*)v);
+	
+	v = alloc(int);
+	*v = 1337;
+	enq(Q, (void*)v);
+	
+	c = (int*)queue_iterate(Q, NULL, &find_negative);
+	assert(c == NULL);
+	
+	while (queue_size(Q) > 0)
+		deq(Q);
+	
+	c = (int*)queue_iterate(Q, NULL, &find_negative);
+	assert(c == NULL);
+	
+	v = alloc(int);
+	*v = 15;
+	enq(Q, (void*)v);
+	
+	v = alloc(int);
+	*v = 20;
+	enq(Q, (void*)v);
+	
+	v = alloc(int);
+	*v = 10;
+	c = (int*)queue_iterate(Q, (void*)v, &find_negative);
+	assert(c == v);
+	
+	while (queue_size(Q) > 0) {
+		printint(*(int*)deq(Q)); println("");
+	}
+	
 	queue_t P = (queue_t)queue_iterate(Q, (void*)queue_new(), &copy);
 	while (queue_size(P) > 0 && queue_size(Q) > 0)
 		assert(deq(P) == deq(Q));

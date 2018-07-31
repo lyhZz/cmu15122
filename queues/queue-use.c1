@@ -48,10 +48,13 @@ void* insert(void* x, void* y)
 //@requires x != NULL && y != NULL;
 //@requires \hastag(int*, x) && \hastag(int*, y);
 {
-	if ((*((int*)x)) < (*((int*)y))) {
-		void* first = x;
-		x = y;
-		y = first;
+	int intx = *((int*)x);
+	int inty = *((int*)y);
+	if (intx < inty) {
+		int* x_int_ptr = (int*)x;
+		int* y_int_ptr = (int*)y;
+		*x_int_ptr = inty;
+		*y_int_ptr = intx;
 	}
 	return x;
 }
