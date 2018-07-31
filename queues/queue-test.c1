@@ -84,5 +84,18 @@ int main() {
 	b = (int*)deq(Q);
 	assert(*b == 4);
 	
+	for (int i = -10; i < 10; i += 4) {
+		v = alloc(int);
+		*v = i;
+		enq(Q, (void*)v);
+	}
+	
+	int* c = (int*)queue_iterate(Q, NULL, &find_negative);
+	assert(*c == -10);
+	
+	queue_t P = (queue_t)queue_iterate(Q, (void*)queue_new(), &copy);
+	while (queue_size(P) > 0 && queue_size(Q) > 0)
+		assert(deq(P) == deq(Q));
+	
 	return 0;
 }
