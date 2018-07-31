@@ -4,10 +4,6 @@
 #include "lib/xalloc.h"
 #include "queue.h"
 
-typedef struct queue_header* queue_t;
-typedef bool check_property_fn(void* x);
-typedef void* iterate_fn(void* accum, void* x);
-
 typedef struct list_node list;
 struct list_node {
 	void *data;
@@ -22,9 +18,7 @@ struct queue_header {
 };
 
 bool is_inclusive_segment(list *start, list *end, size_t length) {
-	if (length < 0)
-		return false;
-	else if (start == NULL)
+	if (start == NULL)
 		return length == 0;
 	else if (start == end)
 		return start->next == NULL && length == 1;
@@ -36,36 +30,24 @@ bool is_queue(queue_t Q) {
 	return Q != NULL && is_inclusive_segment(Q->front, Q->back, Q->size);
 }
 
-queue_t queue_new()
-//@ensures \result != NULL && is_queue(\result);
-{
-	queue_t Q = malloc(sizeof(queue));
-	if (Q == NULL) {
-		fprintf(stderr, "Allocation failed!\n");
-		abort();
-	}
+queue_t queue_new() {
+	queue_t Q = xmalloc(sizeof(queue));
 	Q->front = NULL;
 	Q->back = NULL;
 	Q->size = 0;
+	ENSURES(is_queue(Q));
 	return Q;
 }
 
-size_t queue_size(queue_t Q)
-//@requires is_queue(Q);
-//@ensures is_queue(Q) && \result >= 0;
-{
+size_t queue_size(queue_t Q) {
+	REQUIRES(is_queue(Q));
+	ENSURES(is_queue(Q));
 	return Q->size;
 }
 
-void enq(queue_t Q, void *x)
-//@requires is_queue(Q);
-//@ensures is_queue(Q);
-{
-	list *node = malloc(sizeof(list));
-	if (node == NULL) {
-		fprintf(stderr, "Allocation failed!\n");
-		abort();
-	}
+void enq(queue_t Q, void *x) {
+	REQUIRES(is_queue(Q));
+	list *node = xmalloc(sizeof(list));
 	node->data = x;
 	node->next = NULL;
 	if (queue_size(Q) == 0)
@@ -74,78 +56,73 @@ void enq(queue_t Q, void *x)
 		Q->back->next = node;
 	Q->back = node;
 	Q->size++;
+	ENSURES(is_queue(Q));
 }
 
-void* deq(queue_t Q)
-//@requires is_queue(Q) && queue_size(Q) > 0;
-//@ensures is_queue(Q);
-{
+void* deq(queue_t Q) {
+	REQUIRES(is_queue(Q) && queue_size(Q) > 0);
 	list *tmp = Q->front;
 	void *out = tmp->data;
 	Q->front = Q->front->next;
 	Q->size--;
 	free(tmp);
+	ENSURES(is_queue(Q));
 	return out;
 }
 
-void* queue_peek(queue_t Q, size_t i)
-//@requires is_queue(Q) && 0 <= i && i < queue_size(Q);
-//@ensures is_queue(Q);
-{
+void* queue_peek(queue_t Q, size_t i) {
+	REQUIRES(is_queue(Q) && i < queue_size(Q));
 	list *current = Q->front;
 	for (size_t ctr = 0; ctr < i; ctr++)
 		current = current->next;
+	ENSURES(is_queue(Q));
 	return current->data;
 }
 
-void queue_reverse(queue_t Q)
-//@requires is_queue(Q);
-//@ensures is_queue(Q);
-{
-	if (queue_size(Q) <= 1)
-		return;
+void queue_reverse(queue_t Q) {
+	REQUIRES(is_queue(Q));
+	if (queue_size(Q) <= 1) {}
 	else if (queue_size(Q) == 2) {
 		list *tmp = Q->front;
 		Q->front = Q->back;
 		Q->back = tmp;
 		Q->front->next = Q->back;
 		Q->back->next = NULL;
-		return;
 	}
-	list *last = Q->front;
-	list *current = last->next;
-	list *next = current->next;
-	while (current != NULL) {
-		next = current->next;
-		current->next = last;
-		last = current;
-		current = next;
+	else {
+		list *last = Q->front;
+		list *current = last->next;
+		list *next = current->next;
+		while (current != NULL) {
+			next = current->next;
+			current->next = last;
+			last = current;
+			current = next;
+		}
+		list *orig_back = Q->back;
+		Q->back = Q->front;
+		Q->front = orig_back;
+		Q->back->next = NULL;
 	}
-	list *orig_back = Q->back;
-	Q->back = Q->front;
-	Q->front = orig_back;
-	Q->back->next = NULL;
+	ENSURES(is_queue(Q));
+	return;
 }
 
-bool queue_all(queue_t Q, check_property_fn *P)
-//@requires is_queue(Q) && P != NULL;
-//@ensures is_queue(Q);
-{
+bool queue_all(queue_t Q, check_property_fn *p) {
+	REQUIRES(is_queue(Q) && p != NULL);
 	if (queue_size(Q) <= 0)
 		return true;
 	list *current = Q->front;
 	while (current != NULL) {
-		if (!(*P)(current->data))
+		if (!(*p)(current->data))
 			return false;
 		current = current->next;
 	}
 	return true;
 }
 
-void* queue_iterate(queue_t Q, void* base, iterate_fn *f)
-//@requires is_queue(Q) && f != NULL;
-//@ensures is_queue(Q);
-{
+void* queue_iterate(queue_t Q, void* base, iterate_fn *f) {
+	REQUIRES(is_queue(Q) && f != NULL);
 	if (queue_size(Q) <= 0)
 		return base;
 	list *current = Q->front;
@@ -155,4 +132,17 @@ void* queue_iterate(queue_t Q, void* base, iterate_fn *f)
 		current = current->next;
 	}
 	return out;
+}
+
+void queue_free(queue_t Q, free_fn *f) {
+	REQUIRES(Q != NULL);
+	if (f == NULL)
+		free(Q);
+	else {
+		while (queue_size(Q) > 0) {
+			void* v = deq(Q);
+			(*f)(v);
+		}
+		free(Q);
+	}
 }
