@@ -18,10 +18,10 @@ typedef struct queue_header queue;
 struct queue_header {
 	list *front;
 	list *back;
-	int size;
+	size_t size;
 };
 
-bool is_inclusive_segment(list *start, list *end, int length) {
+bool is_inclusive_segment(list *start, list *end, size_t length) {
 	if (length < 0)
 		return false;
 	else if (start == NULL)
@@ -46,7 +46,7 @@ queue_t queue_new()
 	return Q;
 }
 
-int queue_size(queue_t Q)
+size_t queue_size(queue_t Q)
 //@requires is_queue(Q);
 //@ensures is_queue(Q) && \result >= 0;
 {
@@ -72,7 +72,7 @@ void* deq(queue_t Q)
 //@requires is_queue(Q) && queue_size(Q) > 0;
 //@ensures is_queue(Q);
 {
-	node *tmp = Q->front;
+	list *tmp = Q->front;
 	void *out = tmp->data;
 	Q->front = Q->front->next;
 	Q->size--;
@@ -80,12 +80,12 @@ void* deq(queue_t Q)
 	return out;
 }
 
-void* queue_peek(queue_t Q, int i)
+void* queue_peek(queue_t Q, size_t i)
 //@requires is_queue(Q) && 0 <= i && i < queue_size(Q);
 //@ensures is_queue(Q);
 {
 	list *current = Q->front;
-	for (int ctr = 0; ctr < i; ctr++)
+	for (size_t ctr = 0; ctr < i; ctr++)
 		current = current->next;
 	return current->data;
 }
@@ -142,7 +142,6 @@ void* queue_iterate(queue_t Q, void* base, iterate_fn *f)
 		return base;
 	list *current = Q->front;
 	void *out = base;
-	int i = 1;
 	while (current != NULL) {
 		out = (*f)(out, current->data);
 		current = current->next;
