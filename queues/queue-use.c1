@@ -1,0 +1,56 @@
+#use <conio>
+#use <util>
+
+bool even(void* x)
+//@requires x == NULL || \hastag(int*, x);
+{
+	return x != NULL && (*((int*)x)) >= 0 && (*((int*)x)) % 2 == 0;
+}
+
+bool odd(void* x)
+//@requires x == NULL || \hastag(int*, x);
+{
+	return x == NULL || ((*((int*)x)) > 0 && (*((int*)x)) % 2 == 1);
+}
+
+bool incr(void* x)
+//@requires x == NULL || \hastag(int*, x);
+{
+	if (x != NULL) {
+		int* i = (int*)x;
+		(*i)++;
+	}
+	return true;
+}
+
+void* find_negative(void* accum, void* x)
+//@requires x == NULL || \hastag(int*, x);
+//@ensures \hastag(int*, \result);
+{
+	if (x == NULL || *((int*)accum) < 0)
+		return accum;
+	else if (*((int*)x) < 0)
+		return x;
+	else
+		return accum;
+}
+
+void* copy(void* Q, void* elem)
+//@requires \hastag(queue_t, Q);
+//@ensures \hastag(queue_t, \result);
+{
+	enq((queue_t)Q, elem);
+	return Q;
+}
+
+void* insert(void* x, void* y)
+//@requires x != NULL && y != NULL;
+//@requires \hastag(int*, x) && \hastag(int*, y);
+{
+	if ((*((int*)x)) < (*((int*)y))) {
+		void* first = x;
+		x = y;
+		y = first;
+	}
+	return x;
+}
