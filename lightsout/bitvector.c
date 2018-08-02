@@ -8,6 +8,8 @@ uint32_t bitvector_new() {
 }
 
 bool bitvector_get(uint32_t bv, uint8_t i) {
+    if (i > 31)
+        return false;
     uint32_t out = bv >> (31 - i);
 	out &= 1;
 	return out == 1;
@@ -18,6 +20,8 @@ bool bitvector_equal(uint32_t bv1, bitvector bv2) {
 }
 
 uint32_t bitvector_flip(uint32_t bv, uint8_t i) {
+    if (i > 31)
+        return false;
     uint32_t mask = 1;
 	mask = mask << (31 - i);
 	return bv ^ mask;
