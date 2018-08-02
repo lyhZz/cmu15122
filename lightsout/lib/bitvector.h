@@ -22,12 +22,12 @@ bitvector bitvector_new();
 
 /* Get the ith bit of the bitvector n. */
 bool bitvector_get(bitvector B, uint8_t i)
-  /*@requires 0 <= i < BITVECTOR_LIMIT; @*/ ;
+/*@requires 0 <= i < BITVECTOR_LIMIT; @*/ ;
 
 /* Toggle the ith bit of the bitvector n, returning a new bitvector. */
 /* The old bitvector remains unchanged. */
 bitvector bitvector_flip(bitvector B, uint8_t i)
-  /*@requires 0 <= i < BITVECTOR_LIMIT; @*/ ;
+/*@requires 0 <= i < BITVECTOR_LIMIT; @*/ ;
 
 /* Compare two bitvectors for equality. */
 bool bitvector_equal(bitvector B1, bitvector B2);
