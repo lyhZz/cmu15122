@@ -1,5 +1,5 @@
-/* 
- * Hash tables wrapper 
+/*
+ * Hash tables wrapper
  *
  * 15-122 Principles of Imperative Computation */
 
@@ -13,6 +13,7 @@
 #ifndef _BOARD_HASHTABLE_H_
 #define _BOARD_HASHTABLE_H_
 
+typedef struct board_data *board_t;
 struct board_data {
   // Ignore this field (but don't remove it or change its type)
   uint8_t test;
@@ -32,18 +33,18 @@ hdict_t ht_new(size_t capacity)
   /*@requires capacity > 0; @*/
   /*@ensures \result != NULL; @*/ ;
 
-/* ht_lookup(H,B) returns 
- * NULL if no struct containing the board B exists in H
- * A struct containing the board B if one exists in H.
+/* ht_lookup(hd,bv) returns
+ * NULL if no struct containing the board bv exists in hd
+ * A struct containing the board bv if one exists in hd.
  */
-struct board_data *ht_lookup(hdict_t H, bitvector B)
-  /*@requires H != NULL; @*/ ;
+board_t ht_lookup(hdict_t hd, bitvector bv)
+  /*@requires hd != NULL; @*/ ;
 
-/* ht_insert(H,e) has no return value, because it should have as
+/* ht_insert(hd,e) has no return value, because it should have as
  * a precondition that no struct currently in the hashtable contains
- * the same board as DAT->board.
+ * the same board as dat->board.
  */
-void ht_insert(hdict_t H, struct board_data *DAT)
-  /*@requires H != NULL; @*/ ;
+void ht_insert(hdict_t hd, board_t board)
+  /*@requires hd != NULL; @*/ ;
 
 #endif
