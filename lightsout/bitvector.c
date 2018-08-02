@@ -20,5 +20,5 @@ bool bitvector_equal(uint32_t bv1, bitvector bv2) {
 uint32_t bitvector_flip(uint32_t bv, uint8_t i) {
     uint32_t mask = 1;
 	mask = mask << (31 - i);
-	return bv | mask;
+	return bv ^ mask;
 }

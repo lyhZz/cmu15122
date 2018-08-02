@@ -15,7 +15,7 @@
 // typedef _______ bitvector;
 typedef uint32_t bitvector;
 
-#define BITVECTOR_LIMIT 25
+#define BITVECTOR_LIMIT 32
 
 /* Get a new bitvector with everything set to 'false'. */
 bitvector bitvector_new();
