@@ -2,27 +2,25 @@
 #include <stdlib.h>
 #include "lib/*.h"
 
-uint32_t bitvector_new() {
-    uint32_t bv = 0;
-    return bv;
+bitvector bitvector_new() {
+	bitvector bv = 0;
+	return bv;
 }
 
-bool bitvector_get(uint32_t bv, uint8_t i) {
-    if (i > 31)
-        return false;
-    uint32_t out = bv >> (31 - i);
+bool bitvector_get(bitvector bv, uint8_t i) {
+	REQUIRES(0 <= i && i < BITVECTOR_LIMIT);
+	bitvector out = bv >> (31 - i);
 	out &= 1;
 	return out == 1;
 }
 
-bool bitvector_equal(uint32_t bv1, bitvector bv2) {
-    return bv1 == bv2;
+bool bitvector_equal(bitvector bv1, bitvector bv2) {
+	return bv1 == bv2;
 }
 
-uint32_t bitvector_flip(uint32_t bv, uint8_t i) {
-    if (i > 31)
-        return false;
-    uint32_t mask = 1;
+bitvector bitvector_flip(bitvector bv, uint8_t i) {
+	REQUIRES(0 <= i && i < BITVECTOR_LIMIT);
+	bitvector mask = 1;
 	mask = mask << (31 - i);
 	return bv ^ mask;
 }
