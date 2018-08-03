@@ -1,7 +1,13 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include "*.h"
-#include "lib/*.h"
+#include "lib/bitvector.h"
+#include "lib/boardutil.h"
+#include "lib/contracts.h"
+#include "lib/hdict.h"
+#include "lib/heap.h"
+#include "lib/queue.h"
+#include "lib/xalloc.h"
+#include "board-ht.h"
 
 bitvector bitvector_new() {
 	bitvector bv = 0;
