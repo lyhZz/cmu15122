@@ -49,5 +49,6 @@ board_t ht_lookup(hdict_t hd, bitvector bv) {
 
 void ht_insert(hdict_t hd, board_t dat) {
 	REQUIRES(hd != NULL && dat != NULL);
-	hdict_insert(hd, &(dat->board), dat);
+	void *cmp = hdict_insert(hd, &(dat->board), dat);
+	ASSERT(cmp == NULL);
 }
