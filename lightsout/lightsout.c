@@ -67,10 +67,6 @@ int bruteforce(bitvector bv, uint8_t width, uint8_t height) {
 	return 1;
 }
 
-void elem_free(void *elem) {
-	free(elem);
-}
-
 int bfsearch(bitvector bv, uint8_t width, uint8_t height) {
 	if (bitvector_equal(bv, bitvector_new()))
 		return 0;
@@ -103,7 +99,7 @@ int bfsearch(bitvector bv, uint8_t width, uint8_t height) {
 					printf("%u:%u\n", row, col);
 
 					hdict_free(hd);
-					queue_free(q, &elem_free);
+					queue_free(q, NULL);
 					return 0;
 				}
 
@@ -121,12 +117,12 @@ int bfsearch(bitvector bv, uint8_t width, uint8_t height) {
 
 	fprintf(stderr, "No solution was found!\n");
 	hdict_free(hd);
-	queue_free(q, &elem_free);
+	queue_free(q, NULL);
 	return 1;
 }
 
 int main(int argc, char **argv) {
-	if (argc != 2 && argc != 3) {
+	if (argc != 2) {
 		fprintf(stderr, "Usage: %s <board name>\n", argv[0]);
 		return 1;
 	}
@@ -140,7 +136,7 @@ int main(int argc, char **argv) {
 	if (!read_successful) {
 		return 1;
 	}
-
+/*
 	if (argc == 3) {
 		if (argv[2][0] == 'b' || argv[2][0] == 'B')
 			return bruteforce(bv, width, height);
@@ -151,6 +147,6 @@ int main(int argc, char **argv) {
 			return 1;
 		}
 	}
-
+*/
 	return bfsearch(bv, width, height);
 }
