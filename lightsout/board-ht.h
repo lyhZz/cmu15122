@@ -20,7 +20,7 @@ struct board_data {
 
   // This part of the struct acts like the key
   bitvector board;
-
+  bitvector moves;
   // You can add more fields to this struct
   // in order to help you implement the later tasks.
 };

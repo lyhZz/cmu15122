@@ -11,7 +11,7 @@
 
 bool key_equiv(void *x, void *y) {
 	REQUIRES(x != NULL && y != NULL);
-	return bitvector_equal(*(bitvector*)x, *(bitvector*)y);
+	return bitvector_equal(*((bitvector*)x), *((bitvector*)y));
 }
 
 size_t bit_flip(size_t in, uint8_t i) {
@@ -44,9 +44,7 @@ hdict_t ht_new(size_t capacity) {
 
 board_t ht_lookup(hdict_t hd, bitvector bv) {
 	REQUIRES(hd != NULL);
-	struct board_data in;
-	in.board = bv;
-	return (board_t)hdict_lookup(hd, &in);
+	return (board_t)hdict_lookup(hd, &bv);
 }
 
 void ht_insert(hdict_t hd, board_t dat) {
