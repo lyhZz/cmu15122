@@ -1,6 +1,5 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <math.h>
 #include "lib/bitvector.h"
 #include "lib/boardutil.h"
 #include "lib/contracts.h"
@@ -10,11 +9,19 @@
 #include "lib/xalloc.h"
 #include "board-ht.h"
 
+uint32_t power(uint32_t base, uint32_t exp) {
+	if (exp == 0)
+		return 1;
+	else {
+		return base * power(base, exp - 1);
+	}
+}
+
 int bruteforce(bitvector bv, uint8_t width, uint8_t height) {
     bitvector solution, bv_orig = bv;
     uint8_t bit_index;
     uint8_t row, col;
-    for (solution = 0; solution < pow(2, width * height); solution++) {
+    for (solution = 0; solution < power(2, width * height); solution++) {
         bv = bv_orig;
         for (bit_index = 0; bit_index < width * height; bit_index++) {
             if (bitvector_get(solution, bit_index)) {
@@ -32,12 +39,17 @@ int bruteforce(bitvector bv, uint8_t width, uint8_t height) {
             }
         }
         if (bv == 0) {
-            printf("\nBoard is solvable.\nSolution bitmap (the squares marked # need to be pushed to solve):\n");
-            print_board(solution, width, height);
+//			printf("\nBoard is solvable.\nSolution bitmap (the squares marked # need to be pushed to solve):\n");
+//			print_board(solution, width, height);
+
+            for (bit_index = 0; bit_index < width * height; bit_index++)
+                if (bitvector_get(solution, bit_index))
+                    printf("%u:%u\n", bit_index / width, bit_index % width);
+
             return 0;
         }
     }
-    printf("\nNo solution was found!\n");
+    fprintf(stderr, "No solution was found!\n");
     return 1;
 }
 
@@ -57,8 +69,8 @@ int main(int argc, char **argv) {
         return 1;
     }
 
-    printf("Here's the board we're starting with:\n");
-    print_board(bv,  width, height);
+//	printf("Here's the board we're starting with:\n");
+//	print_board(bv,  width, height);
 
     return bruteforce(bv, width, height);
 }
