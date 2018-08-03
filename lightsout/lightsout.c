@@ -26,8 +26,8 @@ bool bit_get(uint64_t bv, uint8_t i) {
 
 bitvector press_button(bitvector bv, uint8_t bit_index, uint8_t width, uint8_t height) {
 	bv = bitvector_flip(bv, bit_index);
-	row = bit_index / width;
-	col = bit_index % width;
+	uint8_t row = bit_index / width;
+	uint8_t col = bit_index % width;
 	if (row != 0)
 		bv = bitvector_flip(bv, bit_index - width);
 	if (row != height - 1)
@@ -44,7 +44,6 @@ int bruteforce(bitvector bv, uint8_t width, uint8_t height) {
 	bitvector solution_if;
 	uint64_t solution;
 	uint8_t bit_index;
-	uint8_t row, col;
 	for (solution = 0; solution < power(2, width * height); solution++) {
 		bv = bv_orig;
 		solution_if = bitvector_new();
@@ -113,21 +112,21 @@ int bfsearch(bitvector bv, uint8_t width, uint8_t height) {
 					board_t n = xmalloc(sizeof(struct board_data));
 					n->board = newboard;
 					n->moves = bitvector_flip(b->moves, get_index(row, col, width, height));
-					ht_insert(ht, n);
+					ht_insert(hd, n);
 					enq(q, n);
 				}
 			}
 		}
 	}
 
+	fprintf(stderr, "No solution was found!\n");
 	hdict_free(hd);
 	queue_free(q, &elem_free);
-	fprintf(stderr, "No solution was found!\n");
 	return 1;
 }
 
 int main(int argc, char **argv) {
-	if (argc != 2) {
+	if (argc != 2 && argc != 3) {
 		fprintf(stderr, "Usage: %s <board name>\n", argv[0]);
 		return 1;
 	}
@@ -140,6 +139,17 @@ int main(int argc, char **argv) {
 	bool read_successful = file_read(board_filename, &bv, &width, &height);
 	if (!read_successful) {
 		return 1;
+	}
+
+	if (argc == 3) {
+		if (argv[2][0] == 'b' || argv[2][0] == 'B')
+			return bruteforce(bv, width, height);
+		else if (argv[2][0] == 's' || argv[2][0] == 'S')
+			return bfsearch(bv, width, height);
+		else {
+			fprintf(stderr, "Usage: %s <board name> <Bruteforce or bfSearch>\n", argv[0]);
+			return 1;
+		}
 	}
 
 	return bfsearch(bv, width, height);
