@@ -17,14 +17,27 @@ unsigned int power(unsigned int base, unsigned int exp) {
 	}
 }
 
+bool bit_get(uint64_t bv, uint8_t i) {
+	REQUIRES(i < BITVECTOR_LIMIT);
+	uint64_t out = bv >> i;
+	out &= 1;
+	return out == 1;
+}
+
 int bruteforce(bitvector bv, uint8_t width, uint8_t height) {
-    bitvector solution, bv_orig = bv;
+    bitvector bv_orig = bv;
+	bitvector solution_if;
+	uint64_t solution;
     uint8_t bit_index;
     uint8_t row, col;
-    for (solution = bitvector_new(); solution < power(2, width * height); solution++) {
+    for (solution = 0; solution < power(2, width * height); solution++) {
         bv = bv_orig;
+		solution_if = bitvector_new();
+		for (bit_index = 0; bit_index < width * height; bit_index++)
+			if (bit_get(solution, bit_index))
+				solution_if = bitvector_flip(solution_if, bit_index);
         for (bit_index = 0; bit_index < width * height; bit_index++) {
-            if (bitvector_get(solution, bit_index)) {
+            if (bitvector_get(solution_if, bit_index)) {
                 bv = bitvector_flip(bv, bit_index);
                 row = bit_index / width;
                 col = bit_index % width;
@@ -43,7 +56,7 @@ int bruteforce(bitvector bv, uint8_t width, uint8_t height) {
 //			print_board(solution, width, height);
 
             for (bit_index = 0; bit_index < width * height; bit_index++)
-                if (bitvector_get(solution, bit_index))
+                if (bitvector_get(solution_if, bit_index))
                     printf("%u:%u\n", bit_index / width, bit_index % width);
 
             return 0;
