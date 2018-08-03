@@ -14,9 +14,21 @@ bool key_equiv(void *x, void *y) {
 	return bitvector_equal(*(bitvector*)x, *(bitvector*)y);
 }
 
+size_t bit_flip(size_t in, uint8_t i) {
+	size_t mask = 1;
+	mask = mask << i;
+	return in ^ mask;
+}
+
 size_t key_hash(void *k) {
 	REQUIRES(k != NULL);
-	return *(bitvector*)k;
+	bitvector bv = *(bitvector*)k;
+	size_t bv_int = 0;
+	int i;
+	for (i = 0; i < BITVECTOR_LIMIT; i++)
+		if (bitvector_get(bv, i))
+			bv_int = bit_flip(bv_int, i);
+	return bv_int;
 }
 
 void value_free(void *val) {
@@ -32,14 +44,12 @@ hdict_t ht_new(size_t capacity) {
 
 board_t ht_lookup(hdict_t hd, bitvector bv) {
 	REQUIRES(hd != NULL);
-	board_t in = xmalloc(sizeof(board_t));
-	in->board = bv;
-	board_t out = (board_t)hdict_lookup(hd, (void*)in);
-	free(in);
-	return out;
+	struct board_data in;
+	in.board = bv;
+	return (board_t)hdict_lookup(hd, &in);
 }
 
 void ht_insert(hdict_t hd, board_t dat) {
-	REQUIRES(hd != NULL);
-	hdict_insert(hd, (void*)(&(dat->board)), (void*)dat);
+	REQUIRES(hd != NULL && dat != NULL);
+	hdict_insert(hd, &(dat->board), dat);
 }
