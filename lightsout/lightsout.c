@@ -1,6 +1,5 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 #include "lib/bitvector.h"
 #include "lib/boardutil.h"
 #include "lib/contracts.h"
@@ -135,10 +134,8 @@ int main(int argc, char **argv) {
 		return 1;
 	}
 
-	if (strstr(board_filename, "boards/board") != NULL) {
+	if (width <= 5 && height <= 5)
 		return bruteforce(bv, width, height);
-	}
-	else {
+	else
 		return bfsearch(bv, width, height);
-	}
 }
