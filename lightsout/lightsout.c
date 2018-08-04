@@ -133,17 +133,11 @@ int main(int argc, char **argv) {
 	if (!read_successful) {
 		return 1;
 	}
-/*
-	if (argc == 3) {
-		if (argv[2][0] == 'b' || argv[2][0] == 'B')
-			return bruteforce(bv, width, height);
-		else if (argv[2][0] == 's' || argv[2][0] == 'S')
-			return bfsearch(bv, width, height);
-		else {
-			fprintf(stderr, "Usage: %s <board name> <Bruteforce or bfSearch>\n", argv[0]);
-			return 1;
-		}
+
+	if (width <= 5 && height <= 5) {
+		return bruteforce(bv, width, height);
 	}
-*/
-	return bfsearch(bv, width, height);
+	else {
+		return bfsearch(bv, width, height);
+	}
 }
