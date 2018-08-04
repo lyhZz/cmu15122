@@ -71,26 +71,24 @@ int bfsearch(bitvector bv, uint8_t width, uint8_t height) {
 	if (bitvector_equal(bv, bitvector_new()))
 		return 0;
 
-	board_t b = xmalloc(sizeof(struct board_data));
-	b->board = bv;
-	b->moves = bitvector_new();
+	struct board_data init;
+	init.board = bv;
+	init.moves = bitvector_new();
 
 	hdict_t hd = ht_new(width * height);
 	queue_t q = queue_new();
-	enq(q, b);
+	enq(q, &init);
 
 	uint8_t row, col, bit_index;
-
+	board_t b;
 	while (!queue_empty(q)) {
 		b = deq(q);
-		// Consider all the moves
+
 		for (row = 0; row < height; row++) {
 			for (col = 0; col < width; col++) {
 
-				// Press a button
 				bitvector newboard = press_button(b->board, get_index(row, col, width, height), width, height);
 
-				// Test if lights out
 				if (bitvector_equal(newboard, bitvector_new())) {
 					for (bit_index = 0; bit_index < width * height; bit_index++)
 						if (bitvector_get(b->moves, bit_index))
@@ -103,7 +101,6 @@ int bfsearch(bitvector bv, uint8_t width, uint8_t height) {
 					return 0;
 				}
 
-				// Insert newboard into dict if it is not there
 				if (ht_lookup(hd, newboard) == NULL) {
 					board_t n = xmalloc(sizeof(struct board_data));
 					n->board = newboard;
