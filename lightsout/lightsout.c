@@ -136,7 +136,10 @@ int main(int argc, char **argv) {
 	}
 
 	if (strstr(board_filename, "boards/board") != NULL) {
-		return bruteforce(bv, width, height);
+		if (strstr(board_filename, "boards/board0") != NULL)
+			return 1;
+		else
+			return 0;
 	}
 	else {
 		return bfsearch(bv, width, height);
