@@ -41,9 +41,9 @@ int execute(struct bc0_file *bc0) {
 
 	/* Variables */
 	c0v_stack_t S = c0v_stack_new();	/* Operand stack of C0 values */
-	ubyte *P = bc0->function_pool.code;	/* Array of bytes that make up the current function */
+	ubyte *P = bc0->function_pool[0].code;	/* Array of bytes that make up the current function */
 	size_t pc = 0;	/* Current location within the current byte array P */
-	c0_value *V = xmalloc(sizeof(c0_value) * (bc0->function_pool.num_args + bc0->function_pool.num_vars));	/* Local variables (you won't need this till Task 2) */
+	c0_value *V = xmalloc(sizeof(c0_value) * (bc0->function_pool[0].num_args + bc0->function_pool[0].num_vars));	/* Local variables (you won't need this till Task 2) */
 	(void) V;
 
 	/* The call stack, a generic stack that should contain pointers to frames */
@@ -107,90 +107,98 @@ int execute(struct bc0_file *bc0) {
 
 		case IADD: {
 			pc++;
-			uint32_t a = pop_int(S);
-			uint32_t b = pop_int(S);
-			uint32_t result = a + b;
-			push_int(S, (int32_t)result);
+			uint8_t a = pop_int(S);
+			uint8_t b = pop_int(S);
+			uint8_t result = a + b;
+			push_int(S, (int8_t)result);
 			break;
 		}
 
 		case ISUB: {
 			pc++;
-			uint32_t b = pop_int(S);
-			uint32_t a = pop_int(S);
-			uint32_t result = a - b;
-			push_int(S, (int32_t)result);
+			uint8_t b = pop_int(S);
+			uint8_t a = pop_int(S);
+			uint8_t result = a - b;
+			push_int(S, (int8_t)result);
 			break;
 		}
 
 		case IMUL: {
 			pc++;
-			uint32_t a = pop_int(S);
-			uint32_t b = pop_int(S);
-			uint32_t result = a * b;
-			push_int(S, (int32_t)result);
+			uint8_t a = pop_int(S);
+			uint8_t b = pop_int(S);
+			uint8_t result = a * b;
+			push_int(S, (int8_t)result);
 			break;
 		}
 
 		case IDIV: {
 			pc++;
-			int b = pop_int(S);
-			int a = pop_int(S);
-			int result = a / b;
-			push_int(S, result);
+			uint8_t b = pop_int(S);
+			uint8_t a = pop_int(S);
+			if (a == 0x80 && b == 0xFF)
+				c0_arith_error("INT_MIN divided by -1");
+			else if (b == 0)
+				c0_arith_error("Division by zero");
+			uint8_t result = a / b;
+			push_int(S, (int8_t)result);
 			break;
 		}
 
 		case IREM: {
 			pc++;
-			int b = pop_int(S);
-			int a = pop_int(S);
-			int result = a % b;
-			push_int(S, result);
+			uint8_t b = pop_int(S);
+			uint8_t a = pop_int(S);
+			if (a == 0x80 && b == 0xFF)
+				c0_arith_error("INT_MIN divided by -1");
+			else if (b == 0)
+				c0_arith_error("Division by zero");
+			uint8_t result = a % b;
+			push_int(S, (int8_t)result);
 			break;
 		}
 
 		case IAND: {
 			pc++;
-			int a = pop_int(S);
-			int b = pop_int(S);
-			int result = a & b;
-			push_int(S, result);
+			uint8_t a = pop_int(S);
+			uint8_t b = pop_int(S);
+			uint8_t result = a & b;
+			push_int(S, (int8_t)result);
 			break;
 		}
 
 		case IOR: {
 			pc++;
-			int a = pop_int(S);
-			int b = pop_int(S);
-			int result = a | b;
-			push_int(S, result);
+			uint8_t a = pop_int(S);
+			uint8_t b = pop_int(S);
+			uint8_t result = a | b;
+			push_int(S, (int8_t)result);
 			break;
 		}
 
 		case IXOR: {
 			pc++;
-			int a = pop_int(S);
-			int b = pop_int(S);
-			int result = a ^ b;
-			push_int(S, result);
+			uint8_t a = pop_int(S);
+			uint8_t b = pop_int(S);
+			uint8_t result = a ^ b;
+			push_int(S, (int8_t)result);
 			break;
 		}
 
 		case ISHL: {
 			pc++;
-			int b = pop_int(S);
-			int a = pop_int(S);
-			int result = a << b;
+			int8_t b = pop_int(S);
+			int8_t a = pop_int(S);
+			int8_t result = a << b;
 			push_int(S, result);
 			break;
 		}
 
 		case ISHR: {
 			pc++;
-			int b = pop_int(S);
-			int a = pop_int(S);
-			int result = a >> b;
+			int8_t b = pop_int(S);
+			int8_t a = pop_int(S);
+			int8_t result = a >> b;
 			push_int(S, result);
 			break;
 		}
@@ -205,13 +213,13 @@ int execute(struct bc0_file *bc0) {
 		}
 
 		case ILDC: {
-			push_int(S, *(bc0->int_pool)[ (P[pc+1] << 8) | P[pc+2] ]);
+			push_int(S, bc0->int_pool[ (P[pc+1] << 8) | P[pc+2] ]);
 			pc += 3;
 			break;
 		}
 
 		case ALDC: {
-			push_ptr(S, &(*(bc0->string_pool)[ (P[pc+1] << 8) | P[pc+2] ]));
+			push_ptr(S, &(bc0->string_pool[ (P[pc+1] << 8) | P[pc+2] ]));
 			pc += 3;
 			break;
 		}
@@ -248,7 +256,7 @@ int execute(struct bc0_file *bc0) {
 		case IF_CMPEQ: {
 			c0_value a = c0v_pop(S);
 			c0_value b = c0v_pop(S);
-			if (a == b)
+			if (val_equal(a, b))
 				pc += (P[pc+1] << 8) | P[pc+2];
 			else
 				pc += 3;
@@ -258,7 +266,7 @@ int execute(struct bc0_file *bc0) {
 		case IF_CMPNE: {
 			c0_value a = c0v_pop(S);
 			c0_value b = c0v_pop(S);
-			if (a != b)
+			if (!val_equal(a, b))
 				pc += (P[pc+1] << 8) | P[pc+2];
 			else
 				pc += 3;
