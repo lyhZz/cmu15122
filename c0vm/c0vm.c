@@ -40,10 +40,10 @@ int execute(struct bc0_file *bc0) {
 	REQUIRES(bc0 != NULL);
 
 	/* Variables */
-	c0v_stack_t S;	/* Operand stack of C0 values */
-	ubyte *P;		/* Array of bytes that make up the current function */
-	size_t pc;		/* Current location within the current byte array P */
-	c0_value *V;	/* Local variables (you won't need this till Task 2) */
+	c0v_stack_t S = c0v_stack_new();	/* Operand stack of C0 values */
+	ubyte *P = bc0->function_pool.code;	/* Array of bytes that make up the current function */
+	size_t pc = 0;	/* Current location within the current byte array P */
+	c0_value *V = xmalloc(sizeof(c0_value) * (bc0->function_pool.num_args + bc0->function_pool.num_vars));	/* Local variables (you won't need this till Task 2) */
 	(void) V;
 
 	/* The call stack, a generic stack that should contain pointers to frames */
@@ -98,6 +98,7 @@ int execute(struct bc0_file *bc0) {
 			fprintf(stderr, "Returning %d from execute()\n", retval);
 #endif
 			c0v_stack_free(S);
+			free(V);
 			return retval;
 		}
 
@@ -204,13 +205,13 @@ int execute(struct bc0_file *bc0) {
 		}
 
 		case ILDC: {
-			push_int(S, int_pool[ (P[pc+1] << 8) | P[pc+2] ]);
+			push_int(S, *(bc0->int_pool)[ (P[pc+1] << 8) | P[pc+2] ]);
 			pc += 3;
 			break;
 		}
 
 		case ALDC: {
-			push_ptr(S, &string_pool[ (P[pc+1] << 8) | P[pc+2] ]);
+			push_ptr(S, &(*(bc0->string_pool)[ (P[pc+1] << 8) | P[pc+2] ]));
 			pc += 3;
 			break;
 		}
