@@ -204,13 +204,13 @@ int execute(struct bc0_file *bc0) {
 		}
 
 		case ILDC: {
-			push_int(S, int_pool[(P[pc+1]<<8)|P[pc+2]]);
+			push_int(S, int_pool[ (P[pc+1] << 8) | P[pc+2] ]);
 			pc += 3;
 			break;
 		}
 
 		case ALDC: {
-			push_ptr(S, &string_pool[(P[pc+1]<<8)|P[pc+2]]);
+			push_ptr(S, &string_pool[ (P[pc+1] << 8) | P[pc+2] ]);
 			pc += 3;
 			break;
 		}
@@ -239,25 +239,94 @@ int execute(struct bc0_file *bc0) {
 
 		/* Control flow operations */
 
-		case NOP:
+		case NOP: {
+			pc++;
+			break;
+		}
 
-		case IF_CMPEQ:
+		case IF_CMPEQ: {
+			c0_value a = c0v_pop(S);
+			c0_value b = c0v_pop(S);
+			if (a == b)
+				pc += (P[pc+1] << 8) | P[pc+2];
+			else
+				pc += 3;
+			break;
+		}
 
-		case IF_CMPNE:
+		case IF_CMPNE: {
+			c0_value a = c0v_pop(S);
+			c0_value b = c0v_pop(S);
+			if (a != b)
+				pc += (P[pc+1] << 8) | P[pc+2];
+			else
+				pc += 3;
+			break;
+		}
 
-		case IF_ICMPLT:
+		case IF_ICMPLT: {
+			int y = pop_int(S);
+			int x = pop_int(S);
+			if (x < y)
+				pc += (P[pc+1] << 8) | P[pc+2];
+			else
+				pc += 3;
+			break;
+		}
 
-		case IF_ICMPGE:
+		case IF_ICMPGE: {
+			int y = pop_int(S);
+			int x = pop_int(S);
+			if (x >= y)
+				pc += (P[pc+1] << 8) | P[pc+2];
+			else
+				pc += 3;
+			break;
+		}
 
-		case IF_ICMPGT:
+		case IF_ICMPGT: {
+			int y = pop_int(S);
+			int x = pop_int(S);
+			if (x > y)
+				pc += (P[pc+1] << 8) | P[pc+2];
+			else
+				pc += 3;
+			break;
+		}
 
-		case IF_ICMPLE:
+		case IF_ICMPLE: {
+			int y = pop_int(S);
+			int x = pop_int(S);
+			if (x <= y)
+				pc += (P[pc+1] << 8) | P[pc+2];
+			else
+				pc += 3;
+			break;
+		}
 
-		case GOTO:
+		case GOTO: {
+			pc += (P[pc+1] << 8) | P[pc+2];
+			break;
+		}
 
-		case ATHROW:
+		case ATHROW: {
+			c0_user_error((char*)pop_ptr(S));
+			pc++;
+			break;
+		}
 
-		case ASSERT:
+		case ASSERT: {
+			void *error_msg = pop_ptr(S);
+			int x = pop_int(S);
+			if (x == 0) {
+				c0_assertion_failure((char*)error_msg);
+				pc++;
+			}
+			else {
+				pc++;
+			}
+			break;
+		}
 
 
 		/* Function call operations: */
