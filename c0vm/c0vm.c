@@ -215,14 +215,26 @@ int execute(struct bc0_file *bc0) {
 			break;
 		}
 
-		case ACONST_NULL:
+		case ACONST_NULL: {
+			pc++;
+			push_ptr(S, NULL);
+			break;
+		}
 
 
 		/* Operations on local variables */
 
-		case VLOAD:
+		case VLOAD: {
+			c0v_push(S, V[P[pc+1]]);
+			pc += 2;
+			break;
+		}
 
-		case VSTORE:
+		case VSTORE: {
+			V[P[pc+1]] = c0v_pop(S);
+			pc += 2;
+			break;
+		}
 
 
 		/* Control flow operations */
