@@ -4,7 +4,7 @@ int main()
 	int high = 0x122;
 	int mid;
 
-	mid = (high + low)/2;
+	mid = low + (high - low)/2;
 	return mid;
 }
 
