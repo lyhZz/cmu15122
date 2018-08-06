@@ -55,7 +55,7 @@ int execute(struct bc0_file *bc0) {
 
 #ifdef DEBUG
 		/* You can add extra debugging information here */
-		fprintf(stderr, "Opcode %x -- Stack size: %zu -- PC: %zu\n", P[pc], c0v_stack_size(S), pc);
+		fprintf(stderr, "Opcode %x -- Stack size: %zu -- PC: %zu\t", P[pc], c0v_stack_size(S), pc);
 #endif
 
 		switch (P[pc]) {
@@ -107,98 +107,128 @@ int execute(struct bc0_file *bc0) {
 
 		case IADD: {
 			pc++;
-			uint8_t a = pop_int(S);
-			uint8_t b = pop_int(S);
-			uint8_t result = a + b;
-			push_int(S, (int8_t)result);
+			uint32_t b = pop_int(S);
+			uint32_t a = pop_int(S);
+			uint32_t result = a + b;
+			#ifdef DEBUG
+			fprintf(stderr, "0x%X + 0x%X = 0x%X\n", a, b, result);
+			#endif
+			push_int(S, (int32_t)result);
 			break;
 		}
 
 		case ISUB: {
 			pc++;
-			uint8_t b = pop_int(S);
-			uint8_t a = pop_int(S);
-			uint8_t result = a - b;
-			push_int(S, (int8_t)result);
+			uint32_t b = pop_int(S);
+			uint32_t a = pop_int(S);
+			uint32_t result = a - b;
+			#ifdef DEBUG
+			fprintf(stderr, "0x%X - 0x%X = 0x%X\n", a, b, result);
+			#endif
+			push_int(S, (int32_t)result);
 			break;
 		}
 
 		case IMUL: {
 			pc++;
-			uint8_t a = pop_int(S);
-			uint8_t b = pop_int(S);
-			uint8_t result = a * b;
-			push_int(S, (int8_t)result);
+			uint32_t b = pop_int(S);
+			uint32_t a = pop_int(S);
+			uint32_t result = a * b;
+			#ifdef DEBUG
+			fprintf(stderr, "0x%X * 0x%X = 0x%X\n", a, b, result);
+			#endif
+			push_int(S, (int32_t)result);
 			break;
 		}
 
 		case IDIV: {
 			pc++;
-			uint8_t b = pop_int(S);
-			uint8_t a = pop_int(S);
+			uint32_t b = pop_int(S);
+			uint32_t a = pop_int(S);
 			if (a == 0x80 && b == 0xFF)
 				c0_arith_error("INT_MIN divided by -1");
 			else if (b == 0)
 				c0_arith_error("Division by zero");
-			uint8_t result = a / b;
-			push_int(S, (int8_t)result);
+			uint32_t result = a / b;
+			#ifdef DEBUG
+			fprintf(stderr, "0x%X / 0x%X = 0x%X\n", a, b, result);
+			#endif
+			push_int(S, (int32_t)result);
 			break;
 		}
 
 		case IREM: {
 			pc++;
-			uint8_t b = pop_int(S);
-			uint8_t a = pop_int(S);
+			uint32_t b = pop_int(S);
+			uint32_t a = pop_int(S);
 			if (a == 0x80 && b == 0xFF)
 				c0_arith_error("INT_MIN divided by -1");
 			else if (b == 0)
 				c0_arith_error("Division by zero");
-			uint8_t result = a % b;
-			push_int(S, (int8_t)result);
+			uint32_t result = a % b;
+			#ifdef DEBUG
+			fprintf(stderr, "0x%X mod 0x%X = 0x%X\n", a, b, result);
+			#endif
+			push_int(S, (int32_t)result);
 			break;
 		}
 
 		case IAND: {
 			pc++;
-			uint8_t a = pop_int(S);
-			uint8_t b = pop_int(S);
-			uint8_t result = a & b;
-			push_int(S, (int8_t)result);
+			uint32_t b = pop_int(S);
+			uint32_t a = pop_int(S);
+			uint32_t result = a & b;
+			#ifdef DEBUG
+			fprintf(stderr, "0x%X & 0x%X = 0x%X\n", a, b, result);
+			#endif
+			push_int(S, (int32_t)result);
 			break;
 		}
 
 		case IOR: {
 			pc++;
-			uint8_t a = pop_int(S);
-			uint8_t b = pop_int(S);
-			uint8_t result = a | b;
-			push_int(S, (int8_t)result);
+			uint32_t b = pop_int(S);
+			uint32_t a = pop_int(S);
+			uint32_t result = a | b;
+			#ifdef DEBUG
+			fprintf(stderr, "0x%X | 0x%X = 0x%X\n", a, b, result);
+			#endif
+			push_int(S, (int32_t)result);
 			break;
 		}
 
 		case IXOR: {
 			pc++;
-			uint8_t a = pop_int(S);
-			uint8_t b = pop_int(S);
-			uint8_t result = a ^ b;
-			push_int(S, (int8_t)result);
+			uint32_t b = pop_int(S);
+			uint32_t a = pop_int(S);
+			uint32_t result = a ^ b;
+			#ifdef DEBUG
+			fprintf(stderr, "0x%X ^ 0x%X = 0x%X\n", a, b, result);
+			#endif
+			push_int(S, (int32_t)result);
 			break;
 		}
 
 		case ISHL: {
 			pc++;
-			int8_t b = pop_int(S);
-			int8_t a = pop_int(S);
-			int8_t result = a << b;
+			uint32_t b = pop_int(S);
+			uint32_t a = pop_int(S);
+			uint32_t result = a << b;
+			#ifdef DEBUG
+			fprintf(stderr, "0x%X << 0x%X = 0x%X\n", a, b, result);
+			#endif
 			push_int(S, result);
 			break;
 		}
 
 		case ISHR: {
 			pc++;
-			int8_t b = pop_int(S);
-			int8_t a = pop_int(S);
-			int8_t result = a >> b;
+			int32_t b = pop_int(S);
+			int32_t a = pop_int(S);
+			int32_t result = a >> b;
+			#ifdef DEBUG
+			fprintf(stderr, "0x%X >> 0x%X = 0x%X\n", a, b, result);
+			#endif
 			push_int(S, result);
 			break;
 		}
@@ -207,12 +237,18 @@ int execute(struct bc0_file *bc0) {
 		/* Pushing constants */
 
 		case BIPUSH: {
+			#ifdef DEBUG
+			fprintf(stderr, "Bipushing 0x%X onto stack\n", P[pc+1]);
+			#endif
 			push_int(S, P[pc+1]);
 			pc += 2;
 			break;
 		}
 
 		case ILDC: {
+			#ifdef DEBUG
+			fprintf(stderr, "Pushing 0x%X onto stack\n", bc0->int_pool[ (P[pc+1] << 8) | P[pc+2] ]);
+			#endif
 			push_int(S, bc0->int_pool[ (P[pc+1] << 8) | P[pc+2] ]);
 			pc += 3;
 			break;
@@ -235,12 +271,18 @@ int execute(struct bc0_file *bc0) {
 
 		case VLOAD: {
 			c0v_push(S, V[P[pc+1]]);
+			#ifdef DEBUG
+			fprintf(stderr, "Got 0x%X from V[0x%X], pushing onto stack\n", val2int(V[P[pc+1]]), P[pc+1]);
+			#endif
 			pc += 2;
 			break;
 		}
 
 		case VSTORE: {
 			V[P[pc+1]] = c0v_pop(S);
+			#ifdef DEBUG
+			fprintf(stderr, "Popped 0x%X from stack, stored into V[0x%X]\n", val2int(V[P[pc+1]]), P[pc+1]);
+			#endif
 			pc += 2;
 			break;
 		}
