@@ -2,7 +2,6 @@
 #include <stdio.h>
 #include <limits.h>
 #include <stdlib.h>
-
 #include "lib/xalloc.h"
 #include "lib/stack.h"
 #include "lib/contracts.h"
@@ -34,6 +33,21 @@ void *pop_ptr(c0v_stack_t S) {
 
 void push_ptr(c0v_stack_t S, void *ptr) {
 	c0v_push(S, ptr2val(ptr));
+}
+
+uint32_t get_index(uint8_t arg0, uint8_t arg1) {
+	uint32_t arg0_32 = arg0;
+	uint32_t arg1_32 = arg1;
+	arg0_32 = arg0_32 << 8;
+	return arg0_32 | arg1_32;
+}
+
+size_t pc_goto(size_t pc, int8_t arg0, int8_t arg1) {
+	int32_t arg0_32 = arg0;
+	int32_t arg1_32 = arg1;
+	arg0_32 = arg0_32 << 8;
+	int32_t pc_inc = arg0_32 | arg1_32;
+	return pc + pc_inc;
 }
 
 int execute(struct bc0_file *bc0) {
@@ -95,7 +109,7 @@ int execute(struct bc0_file *bc0) {
 			int retval = val2int(c0v_pop(S));
 			assert(c0v_stack_empty(S));
 #ifdef DEBUG
-			fprintf(stderr, "Returning %d from execute()\n", retval);
+			fprintf(stderr, "Returning 0x%X from execute()\n", retval);
 #endif
 			c0v_stack_free(S);
 			free(V);
@@ -107,69 +121,69 @@ int execute(struct bc0_file *bc0) {
 
 		case IADD: {
 			pc++;
-			uint32_t b = pop_int(S);
-			uint32_t a = pop_int(S);
-			uint32_t result = a + b;
+			int32_t b = pop_int(S);
+			int32_t a = pop_int(S);
+			int32_t result = a + b;
 			#ifdef DEBUG
 			fprintf(stderr, "0x%X + 0x%X = 0x%X\n", a, b, result);
 			#endif
-			push_int(S, (int32_t)result);
+			push_int(S, result);
 			break;
 		}
 
 		case ISUB: {
 			pc++;
-			uint32_t b = pop_int(S);
-			uint32_t a = pop_int(S);
-			uint32_t result = a - b;
+			int32_t b = pop_int(S);
+			int32_t a = pop_int(S);
+			int32_t result = a - b;
 			#ifdef DEBUG
 			fprintf(stderr, "0x%X - 0x%X = 0x%X\n", a, b, result);
 			#endif
-			push_int(S, (int32_t)result);
+			push_int(S, result);
 			break;
 		}
 
 		case IMUL: {
 			pc++;
-			uint32_t b = pop_int(S);
-			uint32_t a = pop_int(S);
-			uint32_t result = a * b;
+			int32_t b = pop_int(S);
+			int32_t a = pop_int(S);
+			int32_t result = a * b;
 			#ifdef DEBUG
 			fprintf(stderr, "0x%X * 0x%X = 0x%X\n", a, b, result);
 			#endif
-			push_int(S, (int32_t)result);
+			push_int(S, result);
 			break;
 		}
 
 		case IDIV: {
 			pc++;
-			uint32_t b = pop_int(S);
-			uint32_t a = pop_int(S);
-			if (a == 0x80 && b == 0xFF)
+			int32_t b = pop_int(S);
+			int32_t a = pop_int(S);
+			if (a == INT_MIN && b == -1)
 				c0_arith_error("INT_MIN divided by -1");
 			else if (b == 0)
 				c0_arith_error("Division by zero");
-			uint32_t result = a / b;
+			int32_t result = a / b;
 			#ifdef DEBUG
 			fprintf(stderr, "0x%X / 0x%X = 0x%X\n", a, b, result);
 			#endif
-			push_int(S, (int32_t)result);
+			push_int(S, result);
 			break;
 		}
 
 		case IREM: {
 			pc++;
-			uint32_t b = pop_int(S);
-			uint32_t a = pop_int(S);
-			if (a == 0x80 && b == 0xFF)
+			int32_t b = pop_int(S);
+			int32_t a = pop_int(S);
+			if (a == INT_MIN && b == -1)
 				c0_arith_error("INT_MIN divided by -1");
 			else if (b == 0)
 				c0_arith_error("Division by zero");
-			uint32_t result = a % b;
+			int32_t result = a % b;
 			#ifdef DEBUG
 			fprintf(stderr, "0x%X mod 0x%X = 0x%X\n", a, b, result);
 			#endif
-			push_int(S, (int32_t)result);
+			push_int(S, result);
 			break;
 		}
 
@@ -211,9 +225,11 @@ int execute(struct bc0_file *bc0) {
 
 		case ISHL: {
 			pc++;
-			uint32_t b = pop_int(S);
-			uint32_t a = pop_int(S);
-			uint32_t result = a << b;
+			int32_t b = pop_int(S);
+			int32_t a = pop_int(S);
+			if (b < 0 || b > 31)
+				c0_arith_error("Invalid number of bits to shift left");
+			int32_t result = a << b;
 			#ifdef DEBUG
 			fprintf(stderr, "0x%X << 0x%X = 0x%X\n", a, b, result);
 			#endif
@@ -225,6 +241,8 @@ int execute(struct bc0_file *bc0) {
 			pc++;
 			int32_t b = pop_int(S);
 			int32_t a = pop_int(S);
+			if (b < 0 || b > 31)
+				c0_arith_error("Invalid number of bits to shift right");
 			int32_t result = a >> b;
 			#ifdef DEBUG
 			fprintf(stderr, "0x%X >> 0x%X = 0x%X\n", a, b, result);
@@ -240,28 +258,35 @@ int execute(struct bc0_file *bc0) {
 			#ifdef DEBUG
 			fprintf(stderr, "Bipushing 0x%X onto stack\n", P[pc+1]);
 			#endif
-			push_int(S, P[pc+1]);
+			int8_t signed_byte = P[pc+1];
+			push_int(S, (int32_t)signed_byte);
 			pc += 2;
 			break;
 		}
 
 		case ILDC: {
 			#ifdef DEBUG
-			fprintf(stderr, "Pushing 0x%X onto stack\n", bc0->int_pool[ (P[pc+1] << 8) | P[pc+2] ]);
+			fprintf(stderr, "Pushing 0x%X onto stack from int_pool[0x%X]\n", bc0->int_pool[ get_index(P[pc+1], P[pc+2]) ], get_index(P[pc+1], P[pc+2]));
 			#endif
-			push_int(S, bc0->int_pool[ (P[pc+1] << 8) | P[pc+2] ]);
+			push_int(S, bc0->int_pool[ get_index(P[pc+1], P[pc+2]) ]);
 			pc += 3;
 			break;
 		}
 
 		case ALDC: {
-			push_ptr(S, &(bc0->string_pool[ (P[pc+1] << 8) | P[pc+2] ]));
+			#ifdef DEBUG
+			fprintf(stderr, "Pushing a string onto stack from string_pool[0x%X]\n", get_index(P[pc+1], P[pc+2]));
+			#endif
+			push_ptr(S, &(bc0->string_pool[ get_index(P[pc+1], P[pc+2]) ]));
 			pc += 3;
 			break;
 		}
 
 		case ACONST_NULL: {
 			pc++;
+			#ifdef DEBUG
+			fprintf(stderr, "\n");
+			#endif
 			push_ptr(S, NULL);
 			break;
 		}
@@ -291,72 +316,96 @@ int execute(struct bc0_file *bc0) {
 		/* Control flow operations */
 
 		case NOP: {
+			#ifdef DEBUG
+			fprintf(stderr, "\n");
+			#endif
 			pc++;
 			break;
 		}
 
 		case IF_CMPEQ: {
+			#ifdef DEBUG
+			fprintf(stderr, "\n");
+			#endif
 			c0_value a = c0v_pop(S);
 			c0_value b = c0v_pop(S);
 			if (val_equal(a, b))
-				pc += (P[pc+1] << 8) | P[pc+2];
+				pc = pc_goto(pc, P[pc+1], P[pc+2]);
 			else
 				pc += 3;
 			break;
 		}
 
 		case IF_CMPNE: {
+			#ifdef DEBUG
+			fprintf(stderr, "\n");
+			#endif
 			c0_value a = c0v_pop(S);
 			c0_value b = c0v_pop(S);
 			if (!val_equal(a, b))
-				pc += (P[pc+1] << 8) | P[pc+2];
+				pc = pc_goto(pc, P[pc+1], P[pc+2]);
 			else
 				pc += 3;
 			break;
 		}
 
 		case IF_ICMPLT: {
+			#ifdef DEBUG
+			fprintf(stderr, "\n");
+			#endif
 			int y = pop_int(S);
 			int x = pop_int(S);
 			if (x < y)
-				pc += (P[pc+1] << 8) | P[pc+2];
+				pc = pc_goto(pc, P[pc+1], P[pc+2]);
 			else
 				pc += 3;
 			break;
 		}
 
 		case IF_ICMPGE: {
+			#ifdef DEBUG
+			fprintf(stderr, "\n");
+			#endif
 			int y = pop_int(S);
 			int x = pop_int(S);
 			if (x >= y)
-				pc += (P[pc+1] << 8) | P[pc+2];
+				pc = pc_goto(pc, P[pc+1], P[pc+2]);
 			else
 				pc += 3;
 			break;
 		}
 
 		case IF_ICMPGT: {
+			#ifdef DEBUG
+			fprintf(stderr, "\n");
+			#endif
 			int y = pop_int(S);
 			int x = pop_int(S);
 			if (x > y)
-				pc += (P[pc+1] << 8) | P[pc+2];
+				pc = pc_goto(pc, P[pc+1], P[pc+2]);
 			else
 				pc += 3;
 			break;
 		}
 
 		case IF_ICMPLE: {
+			#ifdef DEBUG
+			fprintf(stderr, "\n");
+			#endif
 			int y = pop_int(S);
 			int x = pop_int(S);
 			if (x <= y)
-				pc += (P[pc+1] << 8) | P[pc+2];
+				pc = pc_goto(pc, P[pc+1], P[pc+2]);
 			else
 				pc += 3;
 			break;
 		}
 
 		case GOTO: {
-			pc += (P[pc+1] << 8) | P[pc+2];
+			#ifdef DEBUG
+			fprintf(stderr, "Going to PC + 0x%X\n", (unsigned int)(pc_goto(pc, P[pc+1], P[pc+2]) - pc) );
+			#endif
+			pc = pc_goto(pc, P[pc+1], P[pc+2]);
 			break;
 		}
 
