@@ -35,9 +35,9 @@ void push_ptr(c0v_stack_t S, void *ptr) {
 	c0v_push(S, ptr2val(ptr));
 }
 
-uint32_t get_index(uint8_t arg0, uint8_t arg1) {
-	uint32_t arg0_32 = arg0;
-	uint32_t arg1_32 = arg1;
+uint16_t get_index(uint8_t arg0, uint8_t arg1) {
+	uint16_t arg0_32 = arg0;
+	uint16_t arg1_32 = arg1;
 	arg0_32 = arg0_32 << 8;
 	return arg0_32 | arg1_32;
 }
@@ -57,7 +57,7 @@ int execute(struct bc0_file *bc0) {
 	c0v_stack_t S = c0v_stack_new();	/* Operand stack of C0 values */
 	ubyte *P = bc0->function_pool[0].code;	/* Array of bytes that make up the current function */
 	size_t pc = 0;	/* Current location within the current byte array P */
-	c0_value *V = xmalloc(sizeof(c0_value) * (bc0->function_pool[0].num_args + bc0->function_pool[0].num_vars));	/* Local variables (you won't need this till Task 2) */
+	c0_value *V = xmalloc(sizeof(c0_value) * (bc0->function_pool[0].num_vars));	/* Local variables (you won't need this till Task 2) */
 	(void) V;
 
 	/* The call stack, a generic stack that should contain pointers to frames */
@@ -69,7 +69,7 @@ int execute(struct bc0_file *bc0) {
 
 		#ifdef DEBUG
 		/* You can add extra debugging information here */
-		fprintf(stderr, "Opcode %x -- Stack size: %zu -- PC: %zu\t", P[pc], c0v_stack_size(S), pc);
+		fprintf(stderr, "Opcode 0x%02X -- Stack size: %zu -- PC: %zu\t", P[pc], c0v_stack_size(S), pc);
 		#endif
 
 		switch (P[pc]) {
@@ -114,14 +114,20 @@ int execute(struct bc0_file *bc0) {
 				frame *return_function = (frame*)pop(callStack);
 				S = return_function->S;
 				P = return_function->P;
-				pc = return_function->pc + 1;
+				pc = return_function->pc;
 				V = return_function->V;
+				free(return_function);
 				c0v_push(S, retval);
+				#ifdef DEBUG
+				fprintf(stderr, "Returning 0x%X\n", val2int(retval));
+				#endif
+				break;
 			}
 			else {
 				#ifdef DEBUG
 				fprintf(stderr, "Returning 0x%X from main\n", val2int(retval));
 				#endif
+				stack_free(callStack, NULL);
 				return val2int(retval);
 			}
 		}
@@ -307,8 +313,8 @@ int execute(struct bc0_file *bc0) {
 		case VLOAD: {
 			c0v_push(S, V[P[pc+1]]);
 			#ifdef DEBUG
-			fprintf(stderr, "Got 0x%X from V[0x%X], pushing onto stack\n", val2int(V[P[pc+1]]), P[pc+1]);
-//			fprintf(stderr, "Got a c0_value from V[0x%X], pushing onto stack\n", P[pc+1]);
+//			fprintf(stderr, "Got 0x%X from V[0x%X], pushing onto stack\n", val2int(V[P[pc+1]]), P[pc+1]);
+			fprintf(stderr, "Got a c0_value from V[0x%X], pushing onto stack\n", P[pc+1]);
 			#endif
 			pc += 2;
 			break;
@@ -317,8 +323,8 @@ int execute(struct bc0_file *bc0) {
 		case VSTORE: {
 			V[P[pc+1]] = c0v_pop(S);
 			#ifdef DEBUG
-			fprintf(stderr, "Popped 0x%X from stack, stored into V[0x%X]\n", val2int(V[P[pc+1]]), P[pc+1]);
-//			fprintf(stderr, "Popped a c0_value from stack, stored into V[0x%X]\n", P[pc+1]);
+//			fprintf(stderr, "Popped 0x%X from stack, stored into V[0x%X]\n", val2int(V[P[pc+1]]), P[pc+1]);
+			fprintf(stderr, "Popped a c0_value from stack, stored into V[0x%X]\n", P[pc+1]);
 			#endif
 			pc += 2;
 			break;
@@ -444,48 +450,56 @@ int execute(struct bc0_file *bc0) {
 		/* Function call operations: */
 
 		case INVOKESTATIC: {
-
-			frame *current_function = xmalloc(sizeof(frame));
-			current_function->S = S;
-			current_function->P = P;
-			current_function->pc = pc; // pc or pc+1 ?
-			current_function->V = V;
-			push(callStack, current_function);
 			
-			uint32_t function_index = get_index(P[pc+1], P[pc+2]);
+			uint16_t function_index = get_index(P[pc+1], P[pc+2]);
 			
 			#ifdef DEBUG
 			fprintf(stderr, "Invoking static function 0x%X\n", function_index);
 			#endif
 			
 			uint16_t argc = bc0->function_pool[function_index].num_args;
-			c0_value args[argc];
-			uint16_t i;
-			c0_value arg;
-			for (i = argc; i > 0; i--) {
-				if (!c0v_stack_empty(S))
-					arg = c0v_pop(S);
-				#ifdef DEBUG
-				fprintf(stderr, "Loading 0x%X from current stack to args array\n", val2int(arg));
-				#endif
-				args[i - 1] = arg;
-			}
+			int i;
+			frame *current_function = xmalloc(sizeof(frame));
+			current_function->S = S;
+			current_function->P = P;
+			current_function->pc = pc + 3;
+			current_function->V = V;
+			push(callStack, current_function);
 			
 			S = c0v_stack_new();
-			for (i = 0; i < argc; i++) {
-				#ifdef DEBUG
-				fprintf(stderr, "Loading 0x%X from args array to function stack\n", val2int(args[i]));
-				#endif
-				c0v_push(S, args[i]);
-			}
 			P = bc0->function_pool[function_index].code;
 			pc = 0;
-			V = xmalloc(sizeof(c0_value) * (bc0->function_pool[function_index].num_args + bc0->function_pool[function_index].num_vars));
+			V = xmalloc(sizeof(c0_value) * (bc0->function_pool[function_index].num_vars));
+			for (i = argc - 1; i >= 0; i--) {
+				V[i] = c0v_pop(current_function->S);
+//				#ifdef DEBUG
+//				fprintf(stderr, "Loading arguments from calling function to V[0x%X]\n", i-1);
+//				#endif
+			}
 			
 			break;
 		}
 
-		case INVOKENATIVE:
+		case INVOKENATIVE: {
+			uint16_t function_index = get_index(P[pc+1], P[pc+2]);
+			
+			#ifdef DEBUG
+			fprintf(stderr, "Invoking native function 0x%X\n", function_index);
+			#endif
+			
+			uint16_t argc = bc0->native_pool[function_index].num_args;
+			c0_value args[argc];
+			int i;
+			for (i = argc - 1; i >= 0; i--) {
+				args[i] = c0v_pop(S);
+			}
+			
+			c0_value native_retval = native_function_table[bc0->native_pool[function_index].function_table_index](args);
+			c0v_push(S, native_retval);
+			
+			pc += 3;
+			break;
+		}
 
 
 		/* Memory allocation operations: */
@@ -516,7 +530,7 @@ int execute(struct bc0_file *bc0) {
 		case CMSTORE:
 
 		default:
-			fprintf(stderr, "invalid opcode: 0x%02x\n", P[pc]);
+			fprintf(stderr, "invalid opcode: 0x%02X\n", P[pc]);
 			abort();
 		}
 	}
