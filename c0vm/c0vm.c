@@ -504,30 +504,207 @@ int execute(struct bc0_file *bc0) {
 
 		/* Memory allocation operations: */
 
-		case NEW:
+		case NEW: {
+			
+			#ifdef DEBUG
+			fprintf(stderr, "Allocating 0x%X bytes of memory\n", P[pc+1]);
+			#endif
+			
+			void *new_ptr = xcalloc(sizeof(char), P[pc+1]);
+			push_ptr(S, new_ptr);
+			pc += 2;
+			break;
+		}
 
-		case NEWARRAY:
+		case NEWARRAY: {
+			
+			int array_length = pop_int(S);
+			
+			#ifdef DEBUG
+			fprintf(stderr, "Allocating an array of length 0x%X, element size 0x%X bytes\n", array_length, P[pc+1]);
+			#endif
+			
+			c0_array *array = xmalloc(sizeof(c0_array));
+			array->count = array_length;
+			array->elt_size = P[pc+1];
+			array->elems = xcalloc(P[pc+1], array_length);
+			
+			push_ptr(S, array);
+			
+			pc += 2;
+			break;
+		}
 
-		case ARRAYLENGTH:
+		case ARRAYLENGTH: {
+			
+			#ifdef DEBUG
+			fprintf(stderr, "Getting the array length: ");
+			#endif
+			
+			c0_array *array = (c0_array*)pop_ptr(S);
+			if (array == NULL)
+				c0_memory_error("Segmentation fault (attempt to dereference a NULL pointer)");
+			
+			#ifdef DEBUG
+			fprintf(stderr, "0x%X\n", array->count);
+			#endif
+			
+			push_int(S, array->count);
+			
+			pc++;
+			break;
+		}
 
 
 		/* Memory access operations: */
 
-		case AADDF:
+		case AADDF: {
+			
+			#ifdef DEBUG
+			fprintf(stderr, "Offset by 0x%X\n", P[pc+1]);
+			#endif
+			
+			char *a = (char*)pop_ptr(S);
+			if (a == NULL)
+				c0_memory_error("Segmentation fault (attempt to dereference a NULL pointer)");
+			
+			a += P[pc+1];
+			push_ptr(S, a);
+			
+			pc += 2;
+			break;
+		}
 
-		case AADDS:
+		case AADDS: {
+			
+			int i = pop_int(S);
+			
+			#ifdef DEBUG
+			fprintf(stderr, "Array offset by 0x%X\n", i);
+			#endif
+			
+			c0_array *array = (c0_array*)pop_ptr(S);
+			if (array == NULL)
+				c0_memory_error("Segmentation fault (attempt to dereference a NULL pointer)");
+			
+			char *addr = (char*)array->elems + array->elt_size * i;
+			
+			push_ptr(S, addr);
+			
+			pc++;
+			break;
+		}
 
-		case IMLOAD:
+		case IMLOAD: {
+		
+			#ifdef DEBUG
+			fprintf(stderr, "Loading an int from a pointer, ");
+			#endif
+			
+			int *int_ptr = (int*)pop_ptr(S);
+			if (int_ptr == NULL)
+				c0_memory_error("Segmentation fault (attempt to dereference a NULL pointer)");
+			
+			#ifdef DEBUG
+			fprintf(stderr, "pushing 0x%X onto the stack\n", *int_ptr);
+			#endif
+			
+			push_int(S, *int_ptr);
+			pc++;
+			break;
+		}
 
-		case IMSTORE:
+		case IMSTORE: {
+			
+			int x = pop_int(S);
+			
+			#ifdef DEBUG
+			fprintf(stderr, "Storing 0x%X to an address\n", x);
+			#endif
+			
+			int *int_ptr = (int*)pop_ptr(S);
+			if (int_ptr == NULL)
+				c0_memory_error("Segmentation fault (attempt to dereference a NULL pointer)");
+			
+			*int_ptr = x;
+			
+			pc++;
+			break;
+		}
 
-		case AMLOAD:
+		case AMLOAD: {
+			
+			#ifdef DEBUG
+			fprintf(stderr, "Loading a pointer from a pointer\n");
+			#endif
+			
+			void *a = pop_ptr(S);
+			if (a == NULL)
+				c0_memory_error("Segmentation fault (attempt to dereference a NULL pointer)");
+			
+			push_ptr(S, *(void**)a);
+			
+			pc++;
+			break;
+		}
 
-		case AMSTORE:
+		case AMSTORE: {
+			
+			#ifdef DEBUG
+			fprintf(stderr, "Storing a pointer to an address\n");
+			#endif
+			
+			void *b = pop_ptr(S);
+			void *a = pop_ptr(S);
+			
+			if (a == NULL)
+				c0_memory_error("Segmentation fault (attempt to dereference a NULL pointer)");
+			
+			*(void**)a = b;
+			
+			pc++;
+			break;
+		}
 
-		case CMLOAD:
+		case CMLOAD: {
+			
+			#ifdef DEBUG
+			fprintf(stderr, "Loading a char from a pointer, ");
+			#endif
+			
+			char *char_ptr = (char*)pop_ptr(S);
+			if (char_ptr == NULL)
+				c0_memory_error("Segmentation fault (attempt to dereference a NULL pointer)");
+			char c = *char_ptr;
+			c &= 0x7F;
+			
+			#ifdef DEBUG
+			fprintf(stderr, "pushing %c (0x%X) onto the stack\n", c, c);
+			#endif
+			
+			push_int(S, c);
+			pc++;
+			break;
+		}
 
-		case CMSTORE:
+		case CMSTORE: {
+			
+			char c = (char)pop_int(S);
+			c &= 0x7F;
+			
+			#ifdef DEBUG
+			fprintf(stderr, "Storing %c (0x%X) to an address\n", c, c);
+			#endif
+			
+			char *char_ptr = (char*)pop_ptr(S);
+			if (char_ptr == NULL)
+				c0_memory_error("Segmentation fault (attempt to dereference a NULL pointer)");
+			
+			*char_ptr = c;
+			
+			pc++;
+			break;
+		}
 
 		default:
 			fprintf(stderr, "invalid opcode: 0x%02X\n", P[pc]);
