@@ -62,15 +62,15 @@ int execute(struct bc0_file *bc0) {
 
 	/* The call stack, a generic stack that should contain pointers to frames */
 	/* You won't need this until you implement functions. */
-	gstack_t callStack;
+	gstack_t callStack = stack_new();
 	(void) callStack;
 
 	while (true) {
 
-#ifdef DEBUG
+		#ifdef DEBUG
 		/* You can add extra debugging information here */
 		fprintf(stderr, "Opcode %x -- Stack size: %zu -- PC: %zu\t", P[pc], c0v_stack_size(S), pc);
-#endif
+		#endif
 
 		switch (P[pc]) {
 
@@ -106,14 +106,24 @@ int execute(struct bc0_file *bc0) {
 		 * need to be revise it further when you write INVOKESTATIC. */
 
 		case RETURN: {
-			int retval = val2int(c0v_pop(S));
+			c0_value retval = c0v_pop(S);
 			assert(c0v_stack_empty(S));
-#ifdef DEBUG
-			fprintf(stderr, "Returning 0x%X from execute()\n", retval);
-#endif
 			c0v_stack_free(S);
 			free(V);
-			return retval;
+			if (!stack_empty(callStack)) {
+				frame *return_function = (frame*)pop(callStack);
+				S = return_function->S;
+				P = return_function->P;
+				pc = return_function->pc + 1;
+				V = return_function->V;
+				c0v_push(S, retval);
+			}
+			else {
+				#ifdef DEBUG
+				fprintf(stderr, "Returning 0x%X from main\n", val2int(retval));
+				#endif
+				return val2int(retval);
+			}
 		}
 
 
@@ -298,6 +308,7 @@ int execute(struct bc0_file *bc0) {
 			c0v_push(S, V[P[pc+1]]);
 			#ifdef DEBUG
 			fprintf(stderr, "Got 0x%X from V[0x%X], pushing onto stack\n", val2int(V[P[pc+1]]), P[pc+1]);
+//			fprintf(stderr, "Got a c0_value from V[0x%X], pushing onto stack\n", P[pc+1]);
 			#endif
 			pc += 2;
 			break;
@@ -307,6 +318,7 @@ int execute(struct bc0_file *bc0) {
 			V[P[pc+1]] = c0v_pop(S);
 			#ifdef DEBUG
 			fprintf(stderr, "Popped 0x%X from stack, stored into V[0x%X]\n", val2int(V[P[pc+1]]), P[pc+1]);
+//			fprintf(stderr, "Popped a c0_value from stack, stored into V[0x%X]\n", P[pc+1]);
 			#endif
 			pc += 2;
 			break;
@@ -431,7 +443,47 @@ int execute(struct bc0_file *bc0) {
 
 		/* Function call operations: */
 
-		case INVOKESTATIC:
+		case INVOKESTATIC: {
+
+			frame *current_function = xmalloc(sizeof(frame));
+			current_function->S = S;
+			current_function->P = P;
+			current_function->pc = pc; // pc or pc+1 ?
+			current_function->V = V;
+			push(callStack, current_function);
+			
+			uint32_t function_index = get_index(P[pc+1], P[pc+2]);
+			
+			#ifdef DEBUG
+			fprintf(stderr, "Invoking static function 0x%X\n", function_index);
+			#endif
+			
+			uint16_t argc = bc0->function_pool[function_index].num_args;
+			c0_value args[argc];
+			uint16_t i;
+			c0_value arg;
+			for (i = argc; i > 0; i--) {
+				if (!c0v_stack_empty(S))
+					arg = c0v_pop(S);
+				#ifdef DEBUG
+				fprintf(stderr, "Loading 0x%X from current stack to args array\n", val2int(arg));
+				#endif
+				args[i - 1] = arg;
+			}
+			
+			S = c0v_stack_new();
+			for (i = 0; i < argc; i++) {
+				#ifdef DEBUG
+				fprintf(stderr, "Loading 0x%X from args array to function stack\n", val2int(args[i]));
+				#endif
+				c0v_push(S, args[i]);
+			}
+			P = bc0->function_pool[function_index].code;
+			pc = 0;
+			V = xmalloc(sizeof(c0_value) * (bc0->function_pool[function_index].num_args + bc0->function_pool[function_index].num_vars));
+			
+			break;
+		}
 
 		case INVOKENATIVE:
 
