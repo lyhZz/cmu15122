@@ -42,11 +42,11 @@ uint16_t get_index(uint8_t arg0, uint8_t arg1) {
 	return arg0_32 | arg1_32;
 }
 
-size_t pc_goto(size_t pc, int8_t arg0, int8_t arg1) {
-	int32_t arg0_32 = arg0;
-	int32_t arg1_32 = arg1;
-	arg0_32 = arg0_32 << 8;
-	int32_t pc_inc = arg0_32 | arg1_32;
+size_t pc_goto(size_t pc, uint8_t arg0, uint8_t arg1) {
+	uint16_t arg0_16 = (uint16_t)arg0 & 0xFF;
+	uint16_t arg1_16 = (uint16_t)arg1 & 0xFF;
+	arg0_16 = arg0_16 << 8;
+	int16_t pc_inc = arg0_16 | arg1_16;
 	return pc + pc_inc;
 }
 
@@ -519,6 +519,8 @@ int execute(struct bc0_file *bc0) {
 		case NEWARRAY: {
 			
 			int array_length = pop_int(S);
+			if (array_length < 0)
+				c0_memory_error("Trying to allocate a negative size array");
 			
 			#ifdef DEBUG
 			fprintf(stderr, "Allocating an array of length 0x%X, element size 0x%X bytes\n", array_length, P[pc+1]);
@@ -529,7 +531,7 @@ int execute(struct bc0_file *bc0) {
 			array->elt_size = P[pc+1];
 			array->elems = xcalloc(P[pc+1], array_length);
 			
-			push_ptr(S, array);
+			push_ptr(S, (void*)array);
 			
 			pc += 2;
 			break;
@@ -584,8 +586,8 @@ int execute(struct bc0_file *bc0) {
 			#endif
 			
 			c0_array *array = (c0_array*)pop_ptr(S);
-			if (array == NULL)
-				c0_memory_error("Segmentation fault (attempt to dereference a NULL pointer)");
+			if (i < 0 || i > array->count)
+				c0_memory_error("Segmentation fault (array index out of bounds)");
 			
 			char *addr = (char*)array->elems + array->elt_size * i;
 			
