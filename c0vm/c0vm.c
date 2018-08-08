@@ -586,7 +586,9 @@ int execute(struct bc0_file *bc0) {
 			#endif
 			
 			c0_array *array = (c0_array*)pop_ptr(S);
-			if (i < 0 || i > array->count)
+			if (array == NULL)
+				c0_memory_error("Segmentation fault (attempt to dereference a NULL pointer)");
+			if (i < 0 || i >= array->count)
 				c0_memory_error("Segmentation fault (array index out of bounds)");
 			
 			char *addr = (char*)array->elems + array->elt_size * i;
